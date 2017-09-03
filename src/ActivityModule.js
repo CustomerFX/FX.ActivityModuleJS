@@ -7,9 +7,12 @@ define([
     'Sage/MainView/ActivityMgr/ActivityEditor',
     'Sage/MainView/ActivityMgr/HistoryEditor',
     'Sage/Services/ActivityService',
+    'Sage/UI/ActivityList',
+    'Sage/UI/NotesHistoryList',
     'Sage/Data/SingleEntrySDataStore',
     'Sage/Data/SDataServiceRegistry',
     'Sage/UI/Controls/Lookup',
+    'Sage/UI/Controls/GridParts/Columns/SlxLink',
     'FXActivity/CustomConfigurations'
 ],
 function (
@@ -21,9 +24,12 @@ function (
     ActivityEditor,
     HistoryEditor,
     ActivityService,
+    ActivityList,
+    NotesHistoryList,
     SingleEntrySDataStore,
     SDataServiceRegistry,
     Lookup,
+    ColumnLink,
     CustomConfigurations
 ) {
     var __activityModule = declare('FXActiviy.ActivityModule', null, {
@@ -31,9 +37,11 @@ function (
         _configurations: [],
 
         constructor: function() {
-            this.setupActivityEditor();
-            this.setupHistoryEditor();
-            this.setupActivityService();
+            this._setupActivityEditor();
+            this._setupHistoryEditor();
+            this._setupActivityService();
+            this._setupActivityList();
+            this._setupHistoryList();
 
             // load CustomConfigurations
             CustomConfigurations.configurations.forEach(function(config) {
@@ -41,7 +49,7 @@ function (
             }, this);
         },
 
-        setupActivityEditor: function() {
+        _setupActivityEditor: function() {
             ActivityEditor.prototype._fx = this;
             lang.extend(ActivityEditor, {
                 _editor_configurations: [],
@@ -54,7 +62,7 @@ function (
             aspect.before(ActivityEditor.prototype, '_saveAndClose', this._activitySave);
         },
 
-        setupHistoryEditor: function() {
+        _setupHistoryEditor: function() {
             HistoryEditor.prototype._fx = this;
             lang.extend(HistoryEditor, {
                 _editor_configurations: [],
@@ -67,7 +75,7 @@ function (
             aspect.before(HistoryEditor.prototype, '_okClick', this._historySave);
         },
 
-        setupActivityService: function() {
+        _setupActivityService: function() {
             ActivityService.prototype._fx = this;
             lang.extend(ActivityService, {
                 _service_getLookupDefaultContext: this._service_getLookupDefaultContext,
@@ -93,6 +101,16 @@ function (
                         showEditor();
                 }
             });
+        },
+
+        _setupActivityList: function() {
+            ActivityList.prototype._fx = this;
+            aspect.after(ActivityList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
+        },
+
+        _setupHistoryList: function() {
+            NotesHistoryList.prototype._fx = this;
+            aspect.after(NotesHistoryList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
         },
 
         registerLookup: function(config) {
@@ -122,6 +140,7 @@ function (
             this._setConfigValue(config, 'parentContext', []);
             this._setConfigValue(config, 'overrideSeedValueOnSearch', true);
             this._setConfigValue(config, 'allowClearingResult', true);
+            this._setConfigValue(config, 'includeTabColumn', false);
             this._setConfigValue(config, 'active', true);
         },
 
@@ -341,6 +360,27 @@ function (
                 },
                 scope: this
             });
+        },
+
+        _list_onBeforeCreateGrid: function() {
+            this._fx._configurations.forEach(function(config) {
+                if (config.includeTabColumn) {
+                    options.storeOptions.select.push(config.bind.id);
+    				options.storeOptions.select.push(config.bind.text);
+
+                    if (this.tabId == 'ActivityList')
+                        options.storeOptions.select.push('Details/' + config.bind.text);
+
+                    options.columns.push({
+                        field: (this.tabId == 'ActivityList' ? 'Details.' : '') + config.bind.text,
+                        label: config.label,
+                        width: '100px',
+                        type: ColumnsLink,
+                        idField: config.bind.id,
+                        pageName: config.entity
+                    });
+                }
+            }, this);
         }
 
     });
