@@ -120,7 +120,7 @@ function (
             if (!config.active)
                 return;
 
-            console.log('FX: Activity/history customiztion registered for ' + config.entity);
+            console.log('FX: Activity/history customization registered for ' + config.entity);
             this._configurations.push(config);
         },
 
