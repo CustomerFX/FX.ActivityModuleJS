@@ -18,7 +18,8 @@ function(
         		seedProperty: 'Account.Id',
         		parentContext: [
         				{entity: 'Account', id: 'AccountId', text: 'AccountName'}
-        		]
+        		],
+                includeTabColumn: true
         	},
             {
                 active: false,

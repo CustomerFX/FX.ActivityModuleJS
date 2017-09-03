@@ -105,12 +105,12 @@ function (
 
         _setupActivityList: function() {
             ActivityList.prototype._fx = this;
-            aspect.after(ActivityList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
+            aspect.before(ActivityList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
         },
 
         _setupHistoryList: function() {
             NotesHistoryList.prototype._fx = this;
-            aspect.after(NotesHistoryList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
+            aspect.before(NotesHistoryList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
         },
 
         registerLookup: function(config) {
@@ -120,7 +120,7 @@ function (
             if (!config.active)
                 return;
 
-            console.log('Activity/History Dialog customiztion registered for ' + config.entity);
+            console.log('FX: Activity/history customiztion registered for ' + config.entity);
             this._configurations.push(config);
         },
 
@@ -362,7 +362,7 @@ function (
             });
         },
 
-        _list_onBeforeCreateGrid: function() {
+        _list_onBeforeCreateGrid: function(options) {
             this._fx._configurations.forEach(function(config) {
                 if (config.includeTabColumn) {
                     options.storeOptions.select.push(config.bind.id);
@@ -375,7 +375,7 @@ function (
                         field: (this.tabId == 'ActivityList' ? 'Details.' : '') + config.bind.text,
                         label: config.label,
                         width: '100px',
-                        type: ColumnsLink,
+                        type: ColumnLink,
                         idField: config.bind.id,
                         pageName: config.entity
                     });
