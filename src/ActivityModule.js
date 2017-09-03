@@ -26,7 +26,7 @@ function (
     Lookup,
     CustomConfigurations
 ) {
-    var __activityModule = declare('ActivityModule', null, {
+    var __activityModule = declare('FXActiviy.ActivityModule', null, {
 
         _configurations: [],
 
