@@ -48,10 +48,10 @@ function (
                 _editor_createLookup: this._editor_createLookup,
                 _editor_resetContainerLookups: this._editor_resetContainerLookups
             });
-            aspect.after(ActivityEditor.prototype, "_ensureLookupsCreated", this._createDialogLookups);
-            aspect.after(ActivityEditor.prototype, "_manualBind", this._manualBind);
-            aspect.after(ActivityEditor.prototype, "_updateLookupSeedValues", this._updateLookupSeedValues);
-            aspect.before(ActivityEditor.prototype, "_saveAndClose", this._activitySave);
+            aspect.after(ActivityEditor.prototype, '_ensureLookupsCreated', this._createDialogLookups);
+            aspect.after(ActivityEditor.prototype, '_manualBind', this._manualBind);
+            aspect.after(ActivityEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
+            aspect.before(ActivityEditor.prototype, '_saveAndClose', this._activitySave);
         },
 
         setupHistoryEditor: function() {
@@ -61,10 +61,10 @@ function (
                 _editor_createLookup: this._editor_createLookup,
                 _editor_resetContainerLookups: this._editor_resetContainerLookups
             });
-            aspect.after(HistoryEditor.prototype, "createAccountLookup", this._createDialogLookups);
-            aspect.after(HistoryEditor.prototype, "_manualBind",this. _manualBind);
-            aspect.after(HistoryEditor.prototype, "_updateLookupSeedValues", this._updateLookupSeedValues);
-            aspect.before(HistoryEditor.prototype, "_okClick", this._historySave);
+            aspect.after(HistoryEditor.prototype, 'createAccountLookup', this._createDialogLookups);
+            aspect.after(HistoryEditor.prototype, '_manualBind',this. _manualBind);
+            aspect.after(HistoryEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
+            aspect.before(HistoryEditor.prototype, '_okClick', this._historySave);
         },
 
         setupActivityService: function() {
@@ -74,13 +74,13 @@ function (
                 _service_getEntityContext: this._service_getEntityContext
 
             });
-            aspect.around(ActivityService.prototype, "getActivityEntityContext", function(originalMethod) {
+            aspect.around(ActivityService.prototype, 'getActivityEntityContext', function(originalMethod) {
                 return function(scope, callback) {
                     return this._service_getLookupDefaultContext(scope, callback) || originalMethod.call(this, scope, callback);
                 }
             });
 
-            aspect.around(ActivityService.prototype, "completeNewActivity", function(originalMethod) {
+            aspect.around(ActivityService.prototype, 'completeNewActivity', function(originalMethod) {
                 return function(type, args) {
                     var activityService = this;
                     var showEditor = function(scope, context) {
@@ -260,10 +260,10 @@ function (
             for (var i = 0; i < lookups.length; i++) {
                 var lup = lookups[i];
                 var div = new dijit.layout.ContentPane({
-                    "class": "remove-padding lookup-container",
+                    class: 'remove-padding lookup-container',
                     label: lup.label
                 });
-                domConstruct.place(lup.domNode, div.domNode, "only");
+                domConstruct.place(lup.domNode, div.domNode, 'only');
                 container.addChild(div);
             }
             // force restart
