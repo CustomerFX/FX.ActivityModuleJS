@@ -34,7 +34,7 @@ function (
 ) {
     var __activityModule = declare('FXActiviy.ActivityModule', null, {
 
-        _configurations: [],
+        configurations: [],
 
         constructor: function() {
             this._setupActivityEditor();
@@ -50,7 +50,7 @@ function (
         },
 
         _setupActivityEditor: function() {
-            ActivityEditor.prototype._fx = this;
+            ActivityEditor.prototype._activityModule = this;
             lang.extend(ActivityEditor, {
                 _editor_configurations: [],
                 _editor_createLookup: this._editor_createLookup,
@@ -63,7 +63,7 @@ function (
         },
 
         _setupHistoryEditor: function() {
-            HistoryEditor.prototype._fx = this;
+            HistoryEditor.prototype._activityModule = this;
             lang.extend(HistoryEditor, {
                 _editor_configurations: [],
                 _editor_createLookup: this._editor_createLookup,
@@ -76,7 +76,7 @@ function (
         },
 
         _setupActivityService: function() {
-            ActivityService.prototype._fx = this;
+            ActivityService.prototype._activityModule = this;
             lang.extend(ActivityService, {
                 _service_getLookupDefaultContext: this._service_getLookupDefaultContext,
                 _service_getEntityContext: this._service_getEntityContext
@@ -104,12 +104,12 @@ function (
         },
 
         _setupActivityList: function() {
-            ActivityList.prototype._fx = this;
+            ActivityList.prototype._activityModule = this;
             aspect.before(ActivityList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
         },
 
         _setupHistoryList: function() {
-            NotesHistoryList.prototype._fx = this;
+            NotesHistoryList.prototype._activityModule = this;
             aspect.before(NotesHistoryList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
         },
 
@@ -121,7 +121,7 @@ function (
                 return;
 
             console.log('FX: Activity/history customiztion registered for ' + config.entity);
-            this._configurations.push(config);
+            this.configurations.push(config);
         },
 
         _validateConfig: function(config) {
@@ -159,12 +159,12 @@ function (
             var data = this._activityData || this._historyData;
 
             this._editor_configurations.forEach(function(lookup) {
-                var name = data[lookup._fxconfig.bind.text];
-                if (!name && data.Details && data.Details[lookup._fxconfig.bind.text])
-                    name = data.Details[lookup._fxconfig.bind.text];
+                var name = data[lookup._activityModuleConfig.bind.text];
+                if (!name && data.Details && data.Details[lookup._activityModuleConfig.bind.text])
+                    name = data.Details[lookup._activityModuleConfig.bind.text];
 
-                lookup.set('selectedObject', data[lookup._fxconfig.bind.id] ? {
-                    $key: data[lookup._fxconfig.bind.id],
+                lookup.set('selectedObject', data[lookup._activityModuleConfig.bind.id] ? {
+                    $key: data[lookup._activityModuleConfig.bind.id],
                     $descriptor: name
                 } : null);
             }, this);
@@ -188,11 +188,11 @@ function (
             if ((this._editor_configurations || []).length > 0)
                 return;
             // if no lookups to create
-            if ((this._fx._configurations || []).length === 0)
+            if ((this._activityModule.configurations || []).length === 0)
                 return;
 
             // create lookups
-            this._fx._configurations.forEach(function(config) {
+            this._activityModule.configurations.forEach(function(config) {
                 this._editor_configurations.push(this._editor_createLookup.call(this, config));
             }, this);
 
@@ -200,7 +200,7 @@ function (
         },
 
         _activitySave: function() {
-            this._fx._configurations.forEach(function(config) {
+            this._activityModule.configurations.forEach(function(config) {
                 if (this._activityData && this._activityData.Details)
                     this._activityData.Details[config.bind.text] = this._activityData[config.bind.text];
 
@@ -211,7 +211,7 @@ function (
         },
 
         _historySave: function() {
-            this._fx._configurations.forEach(function(config) {
+            this._activityModule.configurations.forEach(function(config) {
                 if (config.hasOwnProperty('onBeforeSave') && typeof config.onBeforeSave === 'function') {
                     config.onBeforeSave.call(this, this._historyData, config);
                 }
@@ -271,7 +271,7 @@ function (
                 }, config)
             ));
 
-            lookup._fxconfig = config;
+            lookup._activityModuleConfig = config;
             return lookup;
         },
 
@@ -293,7 +293,7 @@ function (
 
         _service_getLookupDefaultContext: function(scope, callback) {
             // if no registered configurations
-            if (scope._fx._configurations.length === 0)
+            if (scope._activityModule.configurations.length === 0)
                 return;
 
             var contextService = Sage.Services.getService('ClientEntityContext');
@@ -303,7 +303,7 @@ function (
             if (!entityContext) return false;
 
             var hasContext = false;
-            scope._fx._configurations.forEach(function(config) {
+            scope._activityModule.configurations.forEach(function(config) {
                 if (entityContext.EntityType == 'Sage.Entity.Interfaces.I' + config.entity) {
                     this._service_getEntityContext(config, entityContext, scope, callback);
                     hasContext = true;
@@ -363,7 +363,7 @@ function (
         },
 
         _list_onBeforeCreateGrid: function(options) {
-            this._fx._configurations.forEach(function(config) {
+            this._activityModule.configurations.forEach(function(config) {
                 if (config.includeTabColumn) {
                     options.storeOptions.select.push(config.bind.id);
     				options.storeOptions.select.push(config.bind.text);
