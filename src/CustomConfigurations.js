@@ -9,6 +9,7 @@ function(
 
         configurations: [
             {
+                type: 'Lookup',
                 entity: 'Widget',
                 sort: ['WidgetName'],
                 fields: [
@@ -22,8 +23,10 @@ function(
                 includeTabColumn: true
             },
             {
+                type: 'Lookup',
                 active: false,
                 entity: 'AccountProduct',
+                label: 'Product',
                 fields: [
                     { field: 'ProductName', label: 'Product' },
                     { field: 'Account.AccountName', label: 'Account' }

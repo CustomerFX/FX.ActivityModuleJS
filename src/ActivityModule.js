@@ -45,18 +45,18 @@ function (
 
             // load CustomConfigurations
             CustomConfigurations.configurations.forEach(function(config) {
-                this.registerLookup(config);
+                this.registerControl(config);
             }, this);
         },
 
         _setupActivityEditor: function() {
             ActivityEditor.prototype._activityModule = this;
             lang.extend(ActivityEditor, {
-                _editor_configurations: [],
+                _editor_acitivityModuleControls: [],
                 _editor_createLookup: this._editor_createLookup,
                 _editor_resetContainerLookups: this._editor_resetContainerLookups
             });
-            aspect.after(ActivityEditor.prototype, '_ensureLookupsCreated', this._createDialogLookups);
+            aspect.after(ActivityEditor.prototype, '_ensureLookupsCreated', this._createEditorControls);
             aspect.after(ActivityEditor.prototype, '_manualBind', this._manualBind);
             aspect.after(ActivityEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
             aspect.before(ActivityEditor.prototype, '_saveAndClose', this._activitySave);
@@ -65,11 +65,11 @@ function (
         _setupHistoryEditor: function() {
             HistoryEditor.prototype._activityModule = this;
             lang.extend(HistoryEditor, {
-                _editor_configurations: [],
+                _editor_acitivityModuleControls: [],
                 _editor_createLookup: this._editor_createLookup,
                 _editor_resetContainerLookups: this._editor_resetContainerLookups
             });
-            aspect.after(HistoryEditor.prototype, 'createAccountLookup', this._createDialogLookups);
+            aspect.after(HistoryEditor.prototype, 'createAccountLookup', this._createEditorControls);
             aspect.after(HistoryEditor.prototype, '_manualBind',this. _manualBind);
             aspect.after(HistoryEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
             aspect.before(HistoryEditor.prototype, '_okClick', this._historySave);
@@ -113,6 +113,16 @@ function (
             aspect.before(NotesHistoryList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
         },
 
+        registerControl: function(config) {
+            switch (config.type) {
+                case 'Lookup':
+                    this.registerLookup(config);
+                    break;
+                default:
+                    throw new Error('Invalid configuration type "' + config.type + '". Valid types are: Lookup.');
+            }
+        },
+
         registerLookup: function(config) {
             config.type = 'Lookup';
             this._validateConfig(config);
@@ -125,23 +135,27 @@ function (
         },
 
         _validateConfig: function(config) {
-            if (!config.hasOwnProperty('entity'))
-                throw new Error('Configuration is not valid. Missing entity');
-            if (!config.hasOwnProperty('fields') || config.fields.constructor !== Array || config.fields.length < 1)
-                throw new Error('Configuration is not valid. Missing fields');
+            switch (config.type) {
+                case 'Lookup':
+                    if (!config.hasOwnProperty('entity'))
+                        throw new Error('Configuration is not valid for Lookup. Missing entity');
+                    if (!config.hasOwnProperty('fields') || config.fields.constructor !== Array || config.fields.length < 1)
+                        throw new Error('Configuration is not valid for Lookup. Missing fields');
 
-            this._setConfigValue(config, 'id', config.entity + '_lookup');
-            this._setConfigValue(config, 'label', config.entity);
-            this._setConfigValue(config, 'entityPath', config.entity.toLowerCase() + 's');
-            this._setConfigValue(config, 'bind', {id: config.entity + 'ID', text: config.entity + 'Name'});
-            this._setConfigValue(config, 'select', config.fields.map(function(entry) { return entry.field.replace('.', '/'); }));
-            this._setConfigValue(config, 'include', config.select.filter(function(entry) { return entry.indexOf('/') > -1; }).map(function(entry) { return entry.substr(0, entry.indexOf('/')); }));
-            this._setConfigValue(config, 'filters', []);
-            this._setConfigValue(config, 'parentContext', []);
-            this._setConfigValue(config, 'overrideSeedValueOnSearch', true);
-            this._setConfigValue(config, 'allowClearingResult', true);
-            this._setConfigValue(config, 'includeTabColumn', false);
-            this._setConfigValue(config, 'active', true);
+                    this._setConfigValue(config, 'id', config.entity + '_lookup');
+                    this._setConfigValue(config, 'label', config.entity);
+                    this._setConfigValue(config, 'entityPath', config.entity.toLowerCase() + 's');
+                    this._setConfigValue(config, 'bind', {id: config.entity + 'ID', text: config.entity + 'Name'});
+                    this._setConfigValue(config, 'select', config.fields.map(function(entry) { return entry.field.replace('.', '/'); }));
+                    this._setConfigValue(config, 'include', config.select.filter(function(entry) { return entry.indexOf('/') > -1; }).map(function(entry) { return entry.substr(0, entry.indexOf('/')); }));
+                    this._setConfigValue(config, 'filters', []);
+                    this._setConfigValue(config, 'parentContext', []);
+                    this._setConfigValue(config, 'overrideSeedValueOnSearch', true);
+                    this._setConfigValue(config, 'allowClearingResult', true);
+                    this._setConfigValue(config, 'includeTabColumn', false);
+                    this._setConfigValue(config, 'active', true);
+                    break;
+            }
         },
 
         _setConfigValue(config, key, defaultValue) {
@@ -152,57 +166,74 @@ function (
 
         _manualBind: function() {
             // if no lookups created
-            if ((this._editor_configurations || []).length === 0)
+            if ((this._editor_acitivityModuleControls || []).length === 0)
                 return;
 
             this._isBinding = true;
             var data = this._activityData || this._historyData;
 
-            this._editor_configurations.forEach(function(lookup) {
-                var name = data[lookup._activityModuleConfig.bind.text];
-                if (!name && data.Details && data.Details[lookup._activityModuleConfig.bind.text])
-                    name = data.Details[lookup._activityModuleConfig.bind.text];
+            this._editor_acitivityModuleControls.forEach(function(control) {
 
-                lookup.set('selectedObject', data[lookup._activityModuleConfig.bind.id] ? {
-                    $key: data[lookup._activityModuleConfig.bind.id],
-                    $descriptor: name
-                } : null);
+                switch (control.declaredClass) {
+                    case 'Sage.UI.Controls.Lookup':
+                        var name = data[control._activityModuleConfig.bind.text];
+                        if (!name && data.Details && data.Details[control._activityModuleConfig.bind.text])
+                            name = data.Details[control._activityModuleConfig.bind.text];
+
+                        control.set('selectedObject', data[control._activityModuleConfig.bind.id] ? {
+                            $key: data[control._activityModuleConfig.bind.id],
+                            $descriptor: name
+                        } : null);
+                        break;
+                }
             }, this);
 
             this._isBinding = false;
         },
 
         _updateLookupSeedValues: function(newSeed) {
-            if ((this._editor_configurations || []).length === 0)
+            if ((this._editor_acitivityModuleControls || []).length === 0)
                 return;
 
             var accId = newSeed || (this._activityData || this._historyData).AccountId;
-            this._editor_configurations.forEach(function(lookup) {
-                if (lookup.config.seedProperty)
-                    lookup.config.seedValue = accId;
+            this._editor_acitivityModuleControls.forEach(function(control) {
+                if (control.declaredClass == 'Sage.UI.Controls.Lookup') {
+                    if (control.config.seedProperty)
+                        control.config.seedValue = accId;
+                }
             }, this);
         },
 
-        _createDialogLookups: function() {
-            // if already created lookups
-            if ((this._editor_configurations || []).length > 0)
+        _createEditorControls: function() {
+            // if already created controls
+            if ((this._editor_acitivityModuleControls || []).length > 0)
                 return;
-            // if no lookups to create
+            // if no controls to create
             if ((this._activityModule.configurations || []).length === 0)
                 return;
 
-            // create lookups
+            // create controls
             this._activityModule.configurations.forEach(function(config) {
-                this._editor_configurations.push(this._editor_createLookup.call(this, config));
+                var control = null;
+                switch (config.type) {
+                    case 'Lookup':
+                        control = this._editor_createLookup.call(this, config);
+                        break;
+                }
+
+                if (control != null) this._editor_acitivityModuleControls.push(control);
             }, this);
 
-            this._editor_resetContainerLookups(this.contactContainer, this._editor_configurations);
+            if (this._editor_acitivityModuleControls.length > 0)
+                this._editor_resetContainerLookups(this.contactContainer, this._editor_acitivityModuleControls);
         },
 
         _activitySave: function() {
             this._activityModule.configurations.forEach(function(config) {
-                if (this._activityData && this._activityData.Details)
-                    this._activityData.Details[config.bind.text] = this._activityData[config.bind.text];
+                if (config.type == 'Lookup') {
+                    if (this._activityData && this._activityData.Details)
+                        this._activityData.Details[config.bind.text] = this._activityData[config.bind.text];
+                }
 
                 if (config.hasOwnProperty('onBeforeSave') && typeof config.onBeforeSave === 'function') {
                     config.onBeforeSave.call(this, this._activityData, config);
@@ -364,7 +395,7 @@ function (
 
         _list_onBeforeCreateGrid: function(options) {
             this._activityModule.configurations.forEach(function(config) {
-                if (config.includeTabColumn) {
+                if (config.type == 'Lookup' && config.includeTabColumn) {
                     options.storeOptions.select.push(config.bind.id);
     				options.storeOptions.select.push(config.bind.text);
 
