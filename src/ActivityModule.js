@@ -1,3 +1,11 @@
+/*
+	Customer FX Activity Module
+	See license and usage information at https://github.com/CustomerFX/FX.ActivityModule.JS
+
+	Copyright (c) 2017 Customer FX Corporation
+	http://customerfx.com
+*/
+
 define([
     'dojo/_base/declare',
     'dojo/_base/lang',
@@ -154,6 +162,7 @@ function (
                     this._setConfigValue(config, 'allowClearingResult', true);
                     this._setConfigValue(config, 'includeTabColumn', false);
                     this._setConfigValue(config, 'active', true);
+                    this._setConfigValue(config, 'container', 'contactContainer');
                     break;
             }
         },
@@ -224,8 +233,10 @@ function (
                 if (control != null) this._editor_acitivityModuleControls.push(control);
             }, this);
 
-            if (this._editor_acitivityModuleControls.length > 0)
+            if (this._editor_acitivityModuleControls.length > 0) {
+                // TODO: determine control type and add to appropriate container
                 this._editor_resetContainerLookups(this.contactContainer, this._editor_acitivityModuleControls);
+            }
         },
 
         _activitySave: function() {
