@@ -18,7 +18,7 @@ function(
         configurations: [
 		
             // Add custom configurations here 
-			// See https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/README.md
+            // See https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/README.md
 			
         ]
 

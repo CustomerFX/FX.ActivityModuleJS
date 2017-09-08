@@ -122,8 +122,13 @@ function (
         },
 
         registerCustomization: function(config) {
+            if (!config.hasOwnProperty('type'))
+                throw new Error('Configuration is not valid. Missing "type"');
+
+            config.type = config.type.toLowerCase();
+
             switch (config.type) {
-                case 'Lookup':
+                case 'lookup':
                     this.registerLookup(config);
                     break;
                 default:
@@ -132,7 +137,7 @@ function (
         },
 
         registerLookup: function(config) {
-            config.type = 'Lookup';
+            config.type = 'lookup';
             this._validateConfig(config);
 
             if (!config.active)
@@ -144,7 +149,7 @@ function (
 
         _validateConfig: function(config) {
             switch (config.type) {
-                case 'Lookup':
+                case 'lookup':
                     if (!config.hasOwnProperty('entity'))
                         throw new Error('Configuration is not valid for Lookup. Missing entity');
                     if (!config.hasOwnProperty('fields') || config.fields.constructor !== Array || config.fields.length < 1)
@@ -225,7 +230,7 @@ function (
             this._activityModule.configurations.forEach(function(config) {
                 var control = null;
                 switch (config.type) {
-                    case 'Lookup':
+                    case 'lookup':
                         control = this._editor_createLookup.call(this, config);
                         break;
                 }
@@ -241,7 +246,7 @@ function (
 
         _activitySave: function() {
             this._activityModule.configurations.forEach(function(config) {
-                if (config.type == 'Lookup') {
+                if (config.type == 'lookup') {
                     if (this._activityData && this._activityData.Details)
                         this._activityData.Details[config.bind.text] = this._activityData[config.bind.text];
                 }
@@ -406,7 +411,7 @@ function (
 
         _list_onBeforeCreateGrid: function(options) {
             this._activityModule.configurations.forEach(function(config) {
-                if (config.type == 'Lookup' && config.includeTabColumn) {
+                if (config.type == 'lookup' && config.includeTabColumn) {
                     options.storeOptions.select.push(config.bind.id);
     				options.storeOptions.select.push(config.bind.text);
 
