@@ -31,13 +31,13 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **`entity`** *(required)*  
 **Value:** The entity name the lookup is for.  
 **Sample:** `'AccountProduct'`  
-**Note:** This entity must have an ID and text field added to the Activity & History entities and tables. For example, if the entity is AccountProduct, you must add fields named AccountProductID and AccountProductName to the Activity & History entities (and tables). These properties need to be named based on the table for the entity, not the entity name. So, if the entity's table is named C_PROJECT, but the entity is named CProject, create these values as C_ProjectID and C_ProjectName, not CProjectID, etc. The ID property must be [entity physical table’s name + "Id"]. The case doesn't matter, but the fields do need to match the table name.  
+**Note:** This entity must have an ID and text field added to the Activity & History entities and tables. For example, if the entity is AccountProduct, you must add fields named AccountProductID and AccountProductName to the Activity & History entities (and tables). These properties need to be named based on the table for the entity, not the entity name. So, if the entity's table is named C_PROJECT, but the entity is named CProject, create these values as C_ProjectID and C_ProjectName, not CProjectID, etc. The ID property must be [entity physical tableâ€™s name + "Id"]. The case doesn't matter, but the fields do need to match the table name.  
 
 **`fields`**  
 **Value:** An array of fields you wish to display in the lookup dialog.  This is an array of objects with *field* and *label* properties.   
 **Sample:** `[ {field: 'ProductName', label: 'Product'}, {field: 'Account.AccountName', label: 'Account'} ]`  
 
-**`entitiyPath`**  
+**`entityPath`**  
 **Value:**  The SData path for the entity.   
 **Sample:** `'accountProducts'`.  
 **Default:** If not passed, plural entity value (lower case) will be assumed.  
