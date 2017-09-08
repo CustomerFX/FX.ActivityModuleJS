@@ -291,6 +291,7 @@ function(activityModule) {
 
 While adding your customizations to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file is the recommended approach, declaratively registering customizations will allow you to conditionally add customizations if needed.  
 
-**The following is a sample showing many different types of customizations that were added with this library :thumbsup: :boom:   
+**The following is a sample showing many different types of customizations that were added with this library** :thumbsup: :boom:   
+
 <img src="http://content.screencast.com/users/RyanFarley/folders/Default/media/1ab69451-35d8-472e-bf24-3378517edff5/ActivityModule_SampleWithMany.png">
 
