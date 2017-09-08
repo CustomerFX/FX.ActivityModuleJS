@@ -16,8 +16,8 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **Value:** "Lookup" (currently only lookups are supported). This required value indicates the type of customization you are adding.
 
  **`id`**  
-**Value:** The ID to use for the control. The ID will be automatically given a name if none included. 
-**Default:** Based on configuration type, for example, for type "Lookup", ID will be entity + "_lookup".  
+**Value:** The ID to use for the control. The ID will be automatically given a name if none included.   
+**Default:** Based on configuration type, for example, for type "Lookup", ID will be entity + "_lookup".   
 
 **`label`**  
 **Value:** The text label for the control.  

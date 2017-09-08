@@ -143,11 +143,16 @@ function (
             if (!config.active)
                 return;
 
-            console.log('FX: Activity/history customization registered for ' + config.entity);
+            console.log('[FX] Activity/history customization registered for ' + config.entity + '. (c) 2017 customerfx.com');
             this.configurations.push(config);
         },
 
         _validateConfig: function(config) {
+            // validate general config options
+            this._setConfigValue(config, 'active', true);
+            this._setConfigValue(config, 'includeTabColumn', false);
+
+            // validate specific type coonfig options
             switch (config.type) {
                 case 'lookup':
                     if (!config.hasOwnProperty('entity'))
@@ -165,8 +170,6 @@ function (
                     this._setConfigValue(config, 'parentContext', []);
                     this._setConfigValue(config, 'overrideSeedValueOnSearch', true);
                     this._setConfigValue(config, 'allowClearingResult', true);
-                    this._setConfigValue(config, 'includeTabColumn', false);
-                    this._setConfigValue(config, 'active', true);
                     this._setConfigValue(config, 'container', 'contactContainer');
                     break;
             }
