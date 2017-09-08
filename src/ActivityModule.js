@@ -141,38 +141,27 @@ function (
 
             config.type = config.type.toLowerCase();
 
-            switch (config.type) {
-                case 'lookup':
-                    this.registerLookup(config);
-                    break;
-                case 'config':
-                    this.registerConfig(config);
-                    break;
-                default:
-                    throw new Error('Invalid configuration type "' + config.type + '". Valid types are: Lookup.');
+            var validTypes = ['lookup', 'config'];
+            if (validTypes.indexOf(config.type) === -1) {
+                throw new Error('Invalid configuration type "' + config.type + '". Valid types are "' + validTypes.join('", "') + '".');
             }
+
+            this._validateConfig(config);
+            if (!config.active)
+                return;
+
+            console.log('[FX] Activity/history ' + config.type + ' customization registered. (c) 2017 customerfx.com');
+            this.configurations.push(config);
         },
 
         registerLookup: function(config) {
             config.type = 'lookup';
-            this._validateConfig(config);
-
-            if (!config.active)
-                return;
-
-            console.log('[FX] Activity/history lookup customization registered for ' + config.entity + '. (c) 2017 customerfx.com');
-            this.configurations.push(config);
+            this.registerCustomization(config);
         },
 
         registerConfig: function(config) {
             config.type = 'config';
-            this._validateConfig(config);
-
-            if (!config.active)
-                return;
-
-            console.log('[FX] Activity/history config customization registered. (c) 2017 customerfx.com');
-            this.configurations.push(config);
+            this.registerCustomization(config);
         },
 
         _validateConfig: function(config) {

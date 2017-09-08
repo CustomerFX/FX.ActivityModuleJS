@@ -13,22 +13,22 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 ### General Configuration Options
 
 **`type`** *(required)*  
-**Value:** "Lookup", "Config" (currently only lookup control types are supported). This required value indicates the type of customization you are adding. The "Config" type allows you to create a configuration that only uses the General options (mainly for using the `onAfterDialogCreate` and `onBeforeSave` callback functions).  
+**Value:** "lookup", "config" (currently only lookup control types are supported). This required value indicates the type of customization you are adding. The "config" type allows you to create a configuration that only uses the General options (mainly for using the `onAfterDialogCreate` and `onBeforeSave` callback functions).  
 
  **`id`**  
 **Value:** The ID to use for the control. The ID will be automatically given a name if none included.   
-**Default:** Based on configuration type, for example, for type "Lookup", ID will be entity + "_lookup".   
+**Default:** Based on configuration type, for example, for type "lookup", ID will be entity + "_lookup".   
 
 **`label`**  
 **Value:** The text label for the control.  
-**Default:** Based on configuration type, for example, for type "Lookup", the entity value will be used.  
+**Default:** Based on configuration type, for example, for type "lookup", the entity value will be used.  
 
 **`active`**  
 **Value:** true|false, indicating whether the customization is active or not. This allows you to easily turn off a customization while testing.  
 **Default:** true  
 
 **`includeTabColumn`**  
-**Value:** true|false, indicating whether to add a column to the activity/history tab grids for the value. Note: if the type is "Lookup" the column will be added as a hyperlink.    
+**Value:** true|false, indicating whether to add a column to the activity/history tab grids for the value. Note: if the type is "lookup" the column will be added as a hyperlink.    
 **Default:** false  
 
 **`onAfterDialogCreate`**  
@@ -110,7 +110,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 
 ```javascript
 {
-    type: 'Lookup', 
+    type: 'lookup', 
     entity: 'AccountProduct',
     fields: [
         {field: 'ProductName', label: 'Product'},
@@ -123,7 +123,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 
 ```javascript
 {
-    type: 'Lookup', 
+    type: 'lookup', 
     entity: 'Widget',
     id: 'widgetLookup', /* optional - derive from entity */
     label: 'Widget', /* optional - derive from entity */
@@ -168,7 +168,7 @@ function(
 
         configurations: [
             {
-                type: 'Lookup',
+                type: 'lookup',
                 entity: 'Widget',
                 sort: ['WidgetName'],
                 fields: [
@@ -182,7 +182,7 @@ function(
                 includeTabColumn: true
             },
             {
-                type: 'Lookup',
+                type: 'lookup',
                 entity: 'AccountProduct',
                 label: 'Product',
                 fields: [
@@ -214,7 +214,7 @@ function(activityModule) {
     // Add account product lookup 
     
     activityModule.registerCustomization({
-        type: 'Lookup', 
+        type: 'lookup', 
         entity: 'AccountProduct',
         label: 'Product ', 
         fields: [
@@ -231,6 +231,7 @@ function(activityModule) {
     
     // create configuration object
     var config = {
+        type: 'lookup', 
         entity: 'Widget',
         fields: [
             {field: 'WidgetName', label: 'Widget'},
