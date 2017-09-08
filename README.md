@@ -114,7 +114,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 
 ```javascript
 {
-	type: 'Lookup', (
+	type: 'Lookup', 
 	entity: 'Widget',
 	id: 'widgetLookup', /* optional - derive from entity */
 	label: 'Widget', /* optional - derive from entity */
