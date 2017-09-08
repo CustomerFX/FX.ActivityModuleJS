@@ -74,7 +74,6 @@ function (
             ActivityEditor.prototype._activityModule = this;
             lang.extend(ActivityEditor, {
                 _editor_acitivityModuleControls: [],
-                _editor_createLookup: this._editor_createLookup,
                 _editor_createControl: this._editor_createControl,
                 _editor_onControlChange: this._editor_onControlChange,
                 _editor_addContainerControls: this._editor_addContainerControls
@@ -96,7 +95,6 @@ function (
             HistoryEditor.prototype._activityModule = this;
             lang.extend(HistoryEditor, {
                 _editor_acitivityModuleControls: [],
-                _editor_createLookup: this._editor_createLookup,
                 _editor_createControl: this._editor_createControl,
                 _editor_onControlChange: this._editor_onControlChange,
                 _editor_addContainerControls: this._editor_addContainerControls
@@ -295,19 +293,8 @@ function (
 
             // create controls
             this._activityModule.configurations.forEach(function(config) {
-                var control = null;
-                switch (config.type) {
-                    case 'lookup':
-                        control = this._editor_createLookup.call(this, config);
-                        break;
-                    case 'picklist':
-                    case 'textbox':
-                    case 'datepicker':
-                    case 'checkbox':
-                        control = this._editor_createControl.call(this, config);
-                        break;
-                }
-                if (control != null) this._editor_acitivityModuleControls.push(control);
+                if (config.type != 'config') 
+                    this._editor_acitivityModuleControls.push(this._editor_createControl.call(this, config));
             }, this);
 
             // add to containers
@@ -343,35 +330,6 @@ function (
             }, this);
         },
 
-        _editor_createLookup: function(config) {
-            var lookupConfig = {
-                isModal: true,
-                id: config.id + '_config',
-                displayMode: 'Dialog',
-                storeOptions: {
-                    resourceKind: config.entityPath,
-                    select: config.select,
-                    sort: config.sort
-                },
-                structure: config.fields,
-                gridOptions: {
-                    contextualCondition: '',
-                    contextualShow: '',
-                    selectionMode: 'single'
-                },
-                preFilters: config.filters,
-                seedProperty: config.seedProperty,
-                overrideSeedValueOnSearch: config.overrideSeedValueOnSearch,
-                dialogTitle: 'Select ' + config.label,
-                dialogButtonText: 'OK'
-            };
-
-            var lookup = this._editor_createControl(config);
-            lookup.set('config', lookupConfig);
-
-            return lookup;
-        },
-
         _editor_createControl: function(config) {
             // get control type
             var controlType = null;
@@ -398,8 +356,28 @@ function (
             if (config.type == 'lookup') {
                 control.set('allowClearingResult', config.allowClearingResult);
                 control.set('readonly', true);
-                //control.set('config', lookupConfig);
                 control.textbox.required = false;
+                control.set('config', {
+                    isModal: true,
+                    id: config.id + '_config',
+                    displayMode: 'Dialog',
+                    storeOptions: {
+                        resourceKind: config.entityPath,
+                        select: config.select,
+                        sort: config.sort
+                    },
+                    structure: config.fields,
+                    gridOptions: {
+                        contextualCondition: '',
+                        contextualShow: '',
+                        selectionMode: 'single'
+                    },
+                    preFilters: config.filters,
+                    seedProperty: config.seedProperty,
+                    overrideSeedValueOnSearch: config.overrideSeedValueOnSearch,
+                    dialogTitle: 'Select ' + config.label,
+                    dialogButtonText: 'OK'
+                });
             }
 
             // wire up change event
