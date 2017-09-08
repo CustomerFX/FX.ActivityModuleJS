@@ -8,12 +8,12 @@ This works best using the [Customer FX Custom Loader Module](https://github.com/
 
 ## Registering Configured Customizations
 
-Customizations can be configured in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. This file simply returns an array of configuration objects. You can add configuration objects to this array and they will be automatically loaded at runtime. The configuration options available depend on the type of customization you are configuring. Note: Options not marked as *(required)* are optional and a default value is specified. There is no limit to the amount of customizations you can register. 
+Customizations can be configured in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. This file simply returns an array of configuration objects that contain the options listed below. You can add configuration objects to this array and they will be automatically loaded at runtime. The configuration options available depend on the type of customization you are configuring. The General configuration options apply to all customization types. Refer to the list of options available for the speicific type of customization, for example the Lookup type.   
 
 ### General Configuration Options
 
 **`type`** *(required)*  
-**Value:** "Lookup" (currently only lookups are supported). This required value indicates the type of customization you are adding.
+**Value:** "Lookup", "Config" (currently only lookup control types are supported). This required value indicates the type of customization you are adding. The "Config" type allows you to create a configuration that only uses the General options (mainly for using the `onAfterDialogCreate` and `onBeforeSave` callback functions).  
 
  **`id`**  
 **Value:** The ID to use for the control. The ID will be automatically given a name if none included.   
@@ -30,6 +30,14 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **`includeTabColumn`**  
 **Value:** true|false, indicating whether to add a column to the activity/history tab grids for the value. Note: if the type is "Lookup" the column will be added as a hyperlink.    
 **Default:** false  
+
+**`onAfterDialogCreate`**  
+**Value:** A callback function that fires after the dialog is created and receives one parameter of *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic to further customize the activity dialog in this function in this callback function.  
+**Sample:** `function(config) {}`  
+
+**`onBeforeSave`**  
+**Value:** A callback function that fires before the dialog is closed and the record is saved that receives two parameters for *data* (the current data bound to the Activity or History dialog), and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic, modify the data, etc in this callback function.  
+**Sample:** `function(data, config) {}`  
 
 ### Lookup Type Configuration Options
 
@@ -97,10 +105,6 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **`onSetContext`**  
 **Value:** A callback function that fires when the context is set for the current entity (when the user opens the dialog) that receives three parameters for *entity* (the record that was selected), *data* (the current data bound to the Activity or History dialog), and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic, modify the data, etc in this callback function.  
 **Sample:** `function(entity, data, config) {}`  
-
-**`onBeforeSave`**  
-**Value:** A callback function that fires before the dialog is closed and the record is saved that receives two parameters for *data* (the current data bound to the Activity or History dialog), and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic, modify the data, etc in this callback function.  
-**Sample:** `function(data, config) {}`  
 
 ### Sample Configuration Object - Minimal  
 

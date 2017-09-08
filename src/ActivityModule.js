@@ -68,6 +68,13 @@ function (
             aspect.after(ActivityEditor.prototype, '_manualBind', this._manualBind);
             aspect.after(ActivityEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
             aspect.before(ActivityEditor.prototype, '_saveAndClose', this._activitySave);
+            aspect.after(ActivityEditor.prototype, 'postCreate', function() {
+                this._activityModule.configurations.forEach(function(config) {
+                    if (config.hasOwnProperty('onAfterDialogCreate') && typeof config.onAfterDialogCreate === 'function') {
+                        config.onAfterDialogCreate.call(this, config);
+                    }
+                }, this);
+            });
         },
 
         _setupHistoryEditor: function() {
@@ -81,6 +88,13 @@ function (
             aspect.after(HistoryEditor.prototype, '_manualBind',this. _manualBind);
             aspect.after(HistoryEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
             aspect.before(HistoryEditor.prototype, '_okClick', this._historySave);
+            aspect.after(HistoryEditor.prototype, 'postCreate', function() {
+                this._activityModule.configurations.forEach(function(config) {
+                    if (config.hasOwnProperty('onAfterDialogCreate') && typeof config.onAfterDialogCreate === 'function') {
+                        config.onAfterDialogCreate.call(this, config);
+                    }
+                }, this);
+            });
         },
 
         _setupActivityService: function() {
@@ -131,6 +145,9 @@ function (
                 case 'lookup':
                     this.registerLookup(config);
                     break;
+                case 'config':
+                    this.registerConfig(config);
+                    break;
                 default:
                     throw new Error('Invalid configuration type "' + config.type + '". Valid types are: Lookup.');
             }
@@ -143,7 +160,18 @@ function (
             if (!config.active)
                 return;
 
-            console.log('[FX] Activity/history customization registered for ' + config.entity + '. (c) 2017 customerfx.com');
+            console.log('[FX] Activity/history lookup customization registered for ' + config.entity + '. (c) 2017 customerfx.com');
+            this.configurations.push(config);
+        },
+
+        registerConfig: function(config) {
+            config.type = 'config';
+            this._validateConfig(config);
+
+            if (!config.active)
+                return;
+
+            console.log('[FX] Activity/history config customization registered. (c) 2017 customerfx.com');
             this.configurations.push(config);
         },
 
@@ -171,6 +199,9 @@ function (
                     this._setConfigValue(config, 'overrideSeedValueOnSearch', true);
                     this._setConfigValue(config, 'allowClearingResult', true);
                     this._setConfigValue(config, 'container', 'contactContainer');
+                    break;
+                case 'config':
+                    config.includeTabColumn = false;
                     break;
             }
         },
