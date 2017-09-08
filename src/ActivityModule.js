@@ -53,7 +53,7 @@ function (
 
             // load CustomConfigurations
             CustomConfigurations.configurations.forEach(function(config) {
-                this.registerControl(config);
+                this.registerCustomization(config);
             }, this);
         },
 
@@ -121,7 +121,7 @@ function (
             aspect.before(NotesHistoryList.prototype, 'onBeforeCreateGrid', this._list_onBeforeCreateGrid);
         },
 
-        registerControl: function(config) {
+        registerCustomization: function(config) {
             switch (config.type) {
                 case 'Lookup':
                     this.registerLookup(config);
