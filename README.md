@@ -101,6 +101,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 
 ```javascript
 {
+	type: 'Lookup', 
 	entity: 'AccountProduct',
 	fields: [
 		{field: 'ProductName', label: 'Product'},
