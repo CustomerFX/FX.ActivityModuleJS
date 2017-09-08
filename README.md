@@ -106,12 +106,12 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 
 ```javascript
 {
-	type: 'Lookup', 
-	entity: 'AccountProduct',
-	fields: [
-		{field: 'ProductName', label: 'Product'},
-		{field: 'Account.AccountName', label: 'Account'}
-	]
+    type: 'Lookup', 
+    entity: 'AccountProduct',
+    fields: [
+        {field: 'ProductName', label: 'Product'},
+        {field: 'Account.AccountName', label: 'Account'}
+    ]
 }
 ```  
 
@@ -119,35 +119,83 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 
 ```javascript
 {
-	type: 'Lookup', 
-	entity: 'Widget',
-	id: 'widgetLookup', /* optional - derive from entity */
-	label: 'Widget', /* optional - derive from entity */
-	active: true, /* optional - default true */ 
-	includeTabColumn: false, /* optional - default false */
-	entityPath: 'widgets', /* optional - derive from entity */
-	select: ['WidgetName', 'Account/AccountName'], /* optional - derive from fields*/
-	include: ['Account'], /* optional - derive from fields */
-	sort: ['WidgetName'], /* optional */
-	fields: [
-		{field: 'WidgetName', label: 'Widget'},
-		{field: 'Account.AccountName', label: 'Account'}
-	],
-	filters: [], /* optional */
-	seedProperty: 'Account.Id', /* optional */
-	overrideSeedValueOnSearch: false, /* optional - default true */
-	allowClearingResult: true, /* optional - default true */ 
-	bind: {id: 'WidgetID', text: 'WidgetName'}, /* optional - derive from entity */
-	parentContext: [ /* optional */
-		{entity: 'Account', id: 'AccountId', text: 'AccountName'}
-	],
-	onLookupSelect: function(entity, data, config) {}, /* optional - "this" is dialog */
-	onSetContext: function(entity, data, config) {} /* optional - "this" is dialog */
-	onBeforeSave: function(data, config) {} /* optional - "this" is dialog /* 
+    type: 'Lookup', 
+    entity: 'Widget',
+    id: 'widgetLookup', /* optional - derive from entity */
+    label: 'Widget', /* optional - derive from entity */
+    active: true, /* optional - default true */ 
+    includeTabColumn: false, /* optional - default false */
+    entityPath: 'widgets', /* optional - derive from entity */
+    select: ['WidgetName', 'Account/AccountName'], /* optional - derive from fields*/
+    include: ['Account'], /* optional - derive from fields */
+    sort: ['WidgetName'], /* optional */
+    fields: [
+        {field: 'WidgetName', label: 'Widget'},
+        {field: 'Account.AccountName', label: 'Account'}
+    ],
+    filters: [], /* optional */
+    seedProperty: 'Account.Id', /* optional */
+    overrideSeedValueOnSearch: false, /* optional - default true */
+    allowClearingResult: true, /* optional - default true */ 
+    bind: {id: 'WidgetID', text: 'WidgetName'}, /* optional - derive from entity */
+    parentContext: [ /* optional */
+        {entity: 'Account', id: 'AccountId', text: 'AccountName'}
+    ],
+    onLookupSelect: function(entity, data, config) {}, /* optional - "this" is dialog */
+    onSetContext: function(entity, data, config) {} /* optional - "this" is dialog */
+    onBeforeSave: function(data, config) {} /* optional - "this" is dialog /* 
 } 
 ```  
 
 **Simply add the objects, like the ones above, to the CustomConfigurations.configurations array and the magic will happen, automatically, at runtime.**    
+
+Once you have the configuration object constructed, you'll add it to the CustomConfigurations file. The with with some sample configurations would look like this:  
+
+```javascript   
+// This is a sample CustomConigurations file with two registered lookups to add to the activity & history dialogs
+define([
+    'dojo/_base/lang'
+],
+function(
+    lang
+) {
+
+    return {
+
+        configurations: [
+            {
+                type: 'Lookup',
+                entity: 'Widget',
+                sort: ['WidgetName'],
+                fields: [
+                    { field: 'WidgetName', label: 'Widget' },
+                    { field: 'Account.AccountName', label: 'Account' }
+                ],
+                seedProperty: 'Account.Id',
+                parentContext: [
+                    { entity: 'Account', id: 'AccountId', text: 'AccountName' }
+                ],
+                includeTabColumn: true
+            },
+            {
+                type: 'Lookup',
+                entity: 'AccountProduct',
+                label: 'Product',
+                fields: [
+                    { field: 'ProductName', label: 'Product' },
+                    { field: 'Account.AccountName', label: 'Account' }
+                ],
+                seedProperty: 'Account.Id',
+                parentContext: [
+                    { entity: 'Account', id: 'AccountId', text: 'AccountName' }
+                ]
+            }
+        ];
+
+    };
+
+});
+```
 
 ## Registering Declarative Customizations  
 
@@ -155,26 +203,42 @@ You can also register customizations as runtime as well, instead of adding them 
 
 ```javascript 
 require([
-	'FXActivity/ActivityModule',
+    'FXActivity/ActivityModule',
 ],
 function(activityModule) {
 
-	// Add account product lookup 
+    // Add account product lookup 
+    
+    activityModule.registerCustomization({
+        type: 'Lookup', 
+        entity: 'AccountProduct',
+        label: 'Product ', 
+        fields: [
+            {field: 'ProductName', label: 'Product'},
+            {field: 'Account.AccountName', label: 'Account'}
+        ],
+        seedProperty: 'Account.Id',
+        parentContext: [
+            {entity: 'Account', id: 'AccountId', text: 'AccountName'}
+        ]
+    });
+    
+    // add widget entity lookup 
+    
+	// create configuration object
+    var config = {
+        entity: 'Widget',
+        fields: [
+            {field: 'WidgetName', label: 'Widget'},
+            {field: 'Account.AccountName', label: 'Account'}
+        ]
+    };
 	
-	activityModule.registerCustomization({
-		type: 'Lookup', 
-		entity: 'AccountProduct',
-		label: 'Product ', 
-		fields: [
-				{field: 'ProductName', label: 'Product'},
-				{field: 'Account.AccountName', label: 'Account'}
-		],
-		seedProperty: 'Account.Id',
-		parentContext: [
-				{entity: 'Account', id: 'AccountId', text: 'AccountName'}
-		]
-	});
+	// register it 
+	activityModule.registerCustomization(config);
 
 });
 ```   
+
+While adding your customizations to the CustomConfigurations file is the recommended approach, declaratively registering customizations will allow you to conditionally add customizations if needed.  
 
