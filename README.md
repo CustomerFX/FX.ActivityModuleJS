@@ -149,7 +149,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 
 **Simply add the objects, like the ones above, to the CustomConfigurations.configurations array and the magic will happen, automatically, at runtime.**    
 
-Once you have the configuration object constructed, you'll add it to the CustomConfigurations file. The with with some sample configurations would look like this:  
+Once you have the configuration object constructed, you'll add it to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. The with with some sample configurations would look like this:  
 
 ```javascript   
 // This is a sample CustomConigurations file with two registered lookups to add to the activity & history dialogs
@@ -225,7 +225,7 @@ function(activityModule) {
     
     // add widget entity lookup 
     
-	// create configuration object
+    // create configuration object
     var config = {
         entity: 'Widget',
         fields: [
@@ -234,11 +234,11 @@ function(activityModule) {
         ]
     };
 	
-	// register it 
-	activityModule.registerCustomization(config);
+    // register it 
+    activityModule.registerCustomization(config);
 
 });
 ```   
 
-While adding your customizations to the CustomConfigurations file is the recommended approach, declaratively registering customizations will allow you to conditionally add customizations if needed.  
+While adding your customizations to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file is the recommended approach, declaratively registering customizations will allow you to conditionally add customizations if needed.  
 
