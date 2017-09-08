@@ -1,5 +1,10 @@
 # FX.ActivityModule.JS
-A javascript library module that provides simple, configurable customization to the activity and history dialogs & tabs in Infor CRM Web. The library allows for customizations to be easily configured (in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file) or via declarative use by registering customizations at runtime.
+A javascript library module that provides simple, configurable customization to the activity and history dialogs & tabs in Infor CRM Web. The library allows for customizations to be easily configured (in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file) or via declarative use by registering customizations at runtime.  
+
+This works best using the [Customer FX Custom Loader Module](https://github.com/CustomerFX/FX.CustomLoader.Module). All you need to do is: 
+1. Install the [bundle from the Customer FX Custom Loader Module](https://github.com/CustomerFX/FX.CustomLoader.Module/raw/master/Deliverables/Custom%20Loader%20Module.zip) 
+2. Then, install the [FX.ActivityModule.JS Bundle](https://github.com/CustomerFX/FX.ActivityModule.JS/raw/master/Bundle%20for%20Custom%20Loader/FX.ActivityModule.JS.zip)
+3. Then, add your customization configuration (see options below) to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. 
 
 ## Registering Configured Customizations
 
@@ -141,6 +146,8 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 	onBeforeSave: function(data, config) {} /* optional - "this" is dialog /* 
 } 
 ```  
+
+**Simply add the objects, like the ones above, to the CustomConfigurations.configurations array and the magic will happen, automatically, at runtime.**    
 
 ## Registering Declarative Customizations  
 
