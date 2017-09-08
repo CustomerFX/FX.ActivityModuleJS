@@ -19,7 +19,12 @@ define([
     'Sage/UI/NotesHistoryList',
     'Sage/Data/SingleEntrySDataStore',
     'Sage/Data/SDataServiceRegistry',
+    'Sage/UI/Controls/TextBox',
     'Sage/UI/Controls/Lookup',
+    'Sage/UI/Controls/SingleSelectPickList',
+    'Sage/UI/Controls/MultiSelectPickList',
+    'Sage/UI/Controls/DateTimePicker',
+    'Sage/UI/Controls/CheckBox',
     'Sage/UI/Controls/GridParts/Columns/SlxLink',
     'FXActivity/CustomConfigurations'
 ],
@@ -36,11 +41,19 @@ function (
     NotesHistoryList,
     SingleEntrySDataStore,
     SDataServiceRegistry,
+    TextBox,
     Lookup,
+    SingleSelectPickList,
+    MultiSelectPickList,
+    DateTimePicker,
+    CheckBox,
     ColumnLink,
     CustomConfigurations
 ) {
     var __activityModule = declare('FXActiviy.ActivityModule', null, {
+
+        _validConfigTypes: ['lookup', 'picklist', 'textbox', 'datepicker', 'checkbox', 'config'],
+        _validContainers: ['contactContainer', 'regardingContainer', 'leadContainer', 'categoryContainer', 'notesContainer', 'resultContainer', 'datesContainer'],
 
         configurations: [],
 
@@ -62,7 +75,9 @@ function (
             lang.extend(ActivityEditor, {
                 _editor_acitivityModuleControls: [],
                 _editor_createLookup: this._editor_createLookup,
-                _editor_resetContainerLookups: this._editor_resetContainerLookups
+                _editor_createControl: this._editor_createControl,
+                _editor_onControlChange: this._editor_onControlChange,
+                _editor_addContainerControls: this._editor_addContainerControls
             });
             aspect.after(ActivityEditor.prototype, '_ensureLookupsCreated', this._createEditorControls);
             aspect.after(ActivityEditor.prototype, '_manualBind', this._manualBind);
@@ -82,7 +97,9 @@ function (
             lang.extend(HistoryEditor, {
                 _editor_acitivityModuleControls: [],
                 _editor_createLookup: this._editor_createLookup,
-                _editor_resetContainerLookups: this._editor_resetContainerLookups
+                _editor_createControl: this._editor_createControl,
+                _editor_onControlChange: this._editor_onControlChange,
+                _editor_addContainerControls: this._editor_addContainerControls
             });
             aspect.after(HistoryEditor.prototype, 'createAccountLookup', this._createEditorControls);
             aspect.after(HistoryEditor.prototype, '_manualBind',this. _manualBind);
@@ -140,10 +157,8 @@ function (
                 throw new Error('Configuration is not valid. Missing "type"');
 
             config.type = config.type.toLowerCase();
-
-            var validTypes = ['lookup', 'config'];
-            if (validTypes.indexOf(config.type) === -1) {
-                throw new Error('Invalid configuration type "' + config.type + '". Valid types are "' + validTypes.join('", "') + '".');
+            if (this._validConfigTypes.indexOf(config.type) === -1) {
+                throw new Error('Invalid configuration type "' + config.type + '". Valid types are "' + this._validConfigTypes.join('", "') + '".');
             }
 
             this._validateConfig(config);
@@ -152,16 +167,6 @@ function (
 
             console.log('[FX] Activity/history ' + config.type + ' customization registered. (c) 2017 customerfx.com');
             this.configurations.push(config);
-        },
-
-        registerLookup: function(config) {
-            config.type = 'lookup';
-            this.registerCustomization(config);
-        },
-
-        registerConfig: function(config) {
-            config.type = 'config';
-            this.registerCustomization(config);
         },
 
         _validateConfig: function(config) {
@@ -173,9 +178,9 @@ function (
             switch (config.type) {
                 case 'lookup':
                     if (!config.hasOwnProperty('entity'))
-                        throw new Error('Configuration is not valid for Lookup. Missing entity');
+                        throw new Error('Configuration is not valid for lookup. Missing entity property');
                     if (!config.hasOwnProperty('fields') || config.fields.constructor !== Array || config.fields.length < 1)
-                        throw new Error('Configuration is not valid for Lookup. Missing fields');
+                        throw new Error('Configuration is not valid for lookup. Missing fields property');
 
                     this._setConfigValue(config, 'id', config.entity + '_lookup');
                     this._setConfigValue(config, 'label', config.entity);
@@ -189,9 +194,48 @@ function (
                     this._setConfigValue(config, 'allowClearingResult', true);
                     this._setConfigValue(config, 'container', 'contactContainer');
                     break;
+                case 'picklist':
+                    if (!config.hasOwnProperty('bind'))
+                        throw new Error('Configuration is not valid for picklist. Missing bind property');
+                    if (!config.hasOwnProperty('picklist'))
+                        throw new Error('Configuration is not valid for picklist. Missing picklist property');
+
+                    this._setConfigValue(config, 'multiSelect', false);
+                    this._setConfigValue(config, 'id', config.bind + '_picklist');
+                    this._setConfigValue(config, 'label', config.bind);
+                    this._setConfigValue(config, 'container', 'regardingContainer');
+                    break;
+                case 'textbox':
+                    if (!config.hasOwnProperty('bind'))
+                        throw new Error('Configuration is not valid for textbox. Missing bind property');
+
+                    this._setConfigValue(config, 'id', config.bind + '_textbox');
+                    this._setConfigValue(config, 'label', config.bind);
+                    this._setConfigValue(config, 'container', 'regardingContainer');
+                    break;
+                case 'datepicker':
+                    if (!config.hasOwnProperty('bind'))
+                        throw new Error('Configuration is not valid for datepicker. Missing bind property');
+
+                    this._setConfigValue(config, 'id', config.bind + '_datepicker');
+                    this._setConfigValue(config, 'label', config.bind);
+                    this._setConfigValue(config, 'container', 'datesContainer');
+                    break;
+                case 'checkbox':
+                    if (!config.hasOwnProperty('bind'))
+                        throw new Error('Configuration is not valid for checkbox. Missing bind property');
+
+                    this._setConfigValue(config, 'id', config.bind + '_checkbox');
+                    this._setConfigValue(config, 'label', config.bind);
+                    this._setConfigValue(config, 'container', 'datesContainer');
+                    break;
                 case 'config':
                     config.includeTabColumn = false;
                     break;
+            }
+
+            if (config.container && this._validContainers.indexOf(config.container) === -1) {
+                throw new Error('Invalid container "' + config.container + '". Valid containers are "' + this._validContainers.join('", "') + '".');
             }
         },
 
@@ -256,14 +300,25 @@ function (
                     case 'lookup':
                         control = this._editor_createLookup.call(this, config);
                         break;
+                    case 'picklist':
+                    case 'textbox':
+                    case 'datepicker':
+                    case 'checkbox':
+                        control = this._editor_createControl.call(this, config);
+                        break;
                 }
-
                 if (control != null) this._editor_acitivityModuleControls.push(control);
             }, this);
 
+            // add to containers
             if (this._editor_acitivityModuleControls.length > 0) {
-                // TODO: determine control type and add to appropriate container
-                this._editor_resetContainerLookups(this.contactContainer, this._editor_acitivityModuleControls);
+                this._activityModule._validContainers.forEach(function(container) {
+                    var controls = this._editor_acitivityModuleControls.filter(function(ctrl) { return ctrl._activityModuleConfig.container == container; });
+                    if (controls.length > 0) {
+                        if (container == 'datesContainer') container = 'dateSection_AddEdit';
+                        this._editor_addContainerControls(this[container], controls);
+                    }
+                }, this);
             }
         },
 
@@ -311,21 +366,74 @@ function (
                 dialogButtonText: 'OK'
             };
 
-            var lookup = new Lookup({
+            var lookup = this._editor_createControl(config);
+            lookup.set('config', lookupConfig);
+
+            return lookup;
+        },
+
+        _editor_createControl: function(config) {
+            // get control type
+            var controlType = null;
+            switch (config.type) {
+                case 'lookup': controlType = Lookup; break;
+                case 'picklist': controlType = config.multiSelect ? MultiSelectPickList : SingleSelectPickList; break;
+                case 'textbox': controlType = TextBox; break;
+                case 'datepicker': controlType = DateTimePicker; break;
+                case 'checkbox': controlType = CheckBox; break;
+            }
+
+            // create control
+            var control = new controlType({
                 id: config.id,
-                allowClearingResult: config.allowClearingResult,
-                label: config.label,
-                readonly: true,
-                config: lookupConfig
+                label: config.label
             });
-            lookup.textbox.required = false;
 
-            this.eventConnections.push(connector.connect(lookup, 'onChange',
-                lang.hitch(this, function(config, selection) {
-                    if (this._isBinding)
-                        return;
+            // set picklist specific properties
+            if (config.type == 'picklist') {
+                control.set('pickListName', config.picklist);
+            }
 
-                    var data = this._activityData || this._historyData;
+            // set lookup specific properties
+            if (config.type == 'lookup') {
+                control.set('allowClearingResult', config.allowClearingResult);
+                control.set('readonly', true);
+                //control.set('config', lookupConfig);
+                control.textbox.required = false;
+            }
+
+            // wire up change event
+            this.eventConnections.push(connector.connect(control, 'onChange', lang.hitch(this, this._editor_onControlChange, control, config)));
+
+            control._activityModuleConfig = config;
+            return control;
+        },
+
+        _editor_addContainerControls: function(container, controls) {
+            controls.forEach(function(control) {
+                var div = new dijit.layout.ContentPane({
+                    class: 'remove-padding ' + control._activityModuleConfig.type + '-container ' +  control._activityModuleConfig.type,
+                    style: 'overflow: hidden;',
+                    label: control._activityModuleConfig.label
+                });
+                domConstruct.place(control.domNode, div.domNode, 'only');
+                container.addChild(div);
+            }, this);
+
+            // force restart container
+            container._initialized = false;
+            container._started = false;
+            container.startup();
+        },
+
+        _editor_onControlChange: function(control, config, selection) {
+            if (this._isBinding)
+                return;
+
+            var data = this._activityData || this._historyData;
+
+            switch (config.type) {
+                case 'lookup':
                     if (selection) {
                         data[config.bind.id] = selection.$key;
                         data[config.bind.text] = selection.$descriptor;
@@ -334,31 +442,19 @@ function (
                         data[config.bind.id] = null;
                         data[config.bind.text] = null;
                     }
-
-                    if (config.hasOwnProperty('onLookupSelect') && typeof config.onLookupSelect === 'function') {
-                        config.onLookupSelect.call(this, selection, data, config);
-                    }
-                }, config)
-            ));
-
-            lookup._activityModuleConfig = config;
-            return lookup;
-        },
-
-        _editor_resetContainerLookups: function(container, lookups) {
-            for (var i = 0; i < lookups.length; i++) {
-                var lup = lookups[i];
-                var div = new dijit.layout.ContentPane({
-                    class: 'remove-padding lookup-container',
-                    label: lup.label
-                });
-                domConstruct.place(lup.domNode, div.domNode, 'only');
-                container.addChild(div);
+                    break;
+                case 'checkbox':
+                    var checked = control.get('value');
+                    data[config.bind] = (checked || checked === 'on');
+                    break;
+                default:
+                    data[config.bind] = control.get('value');
             }
-            // force restart
-            container._initialized = false;
-            container._started = false;
-            container.startup();
+
+            if (config.hasOwnProperty('onChange') && typeof config.onChange === 'function') {
+                var selectedValue = config.type == 'lookup' ? selection : control.get('value');
+                config.onChange.call(this, control, selectedValue, data, config);
+            }
         },
 
         _service_getLookupDefaultContext: function(scope, callback) {

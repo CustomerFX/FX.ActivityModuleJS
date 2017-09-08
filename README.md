@@ -8,12 +8,12 @@ This works best using the [Customer FX Custom Loader Module](https://github.com/
 
 ## Registering Configured Customizations
 
-Customizations can be configured in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. This file simply returns an array of configuration objects that contain the options listed below. You can add configuration objects to this array and they will be automatically loaded at runtime. The configuration options available depend on the type of customization you are configuring. The General configuration options apply to all customization types. Refer to the list of options available for the speicific type of customization, for example the Lookup type.   
+Customizations can be configured in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. This file simply returns an array of configuration objects that contain the options listed below. You can add configuration objects to this array and they will be automatically loaded at runtime. The configuration options available depend on the type of customization you are configuring. The General configuration options apply to all customization types. Refer to the list of options available for the specific type of customization, for example the Lookup type.   
 
 ### General Configuration Options
 
 **`type`** *(required)*  
-**Value:** "lookup", "config" (currently only lookup control types are supported). This required value indicates the type of customization you are adding. The "config" type allows you to create a configuration that only uses the General options (mainly for using the `onAfterDialogCreate` and `onBeforeSave` callback functions).  
+**Value:** "lookup", "picklist", "textbox", "datepicker", "checkbox", "config". This required value indicates the type of customization you are adding. The "config" type allows you to create a configuration that only uses the General options (mainly for using the `onAfterDialogCreate` and `onBeforeSave` callback functions).  
 
  **`id`**  
 **Value:** The ID to use for the control. The ID will be automatically given a name if none included.   
@@ -27,6 +27,10 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **Value:** true|false, indicating whether the customization is active or not. This allows you to easily turn off a customization while testing.  
 **Default:** true  
 
+**`container`**  
+**Value:** "contactContainer", "regardingContainer", "leadContainer", "categoryContainer", "notesContainer", "datesContainer", "resultContainer". Indicates the container to add the control to.    
+**Default:** Based on configuration type.  
+
 **`includeTabColumn`**  
 **Value:** true|false, indicating whether to add a column to the activity/history tab grids for the value. Note: if the type is "lookup" the column will be added as a hyperlink.    
 **Default:** false  
@@ -39,7 +43,11 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **Value:** A callback function that fires before the dialog is closed and the record is saved that receives two parameters for *data* (the current data bound to the Activity or History dialog), and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic, modify the data, etc in this callback function.  
 **Sample:** `function(data, config) {}`  
 
-### Lookup Type Configuration Options
+**`onChange`**  
+**Value:** A callback function that fires when the changes the value of the control that receives four parameters for *control* (the control that was changed), *value* (the value of the control), *data* (the current data bound to the Activity or History dialog), and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic, modify the data, etc in this callback function.  
+**Sample:** `function(control, value, data, config) {}`  
+
+### Lookup Type Configuration Options   
 
 **`entity`** *(required)*  
 **Value:** The entity name the lookup is for.  
@@ -98,13 +106,47 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **Sample:** `[{entity: 'Account', id: 'AccountId', text: 'AccountName'}]`  
 **Default:** None  
 
-**`onLookupSelect`**  
-**Value:** A callback function that fires when the user selects an result in the lookup dialog that receives three parameters for *entity* (the record that was selected), *data* (the current data bound to the Activity or History dialog), and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic, modify the data, etc in this callback function.  
-**Sample:** `function(entity, data, config) {}`  
-
 **`onSetContext`**  
 **Value:** A callback function that fires when the context is set for the current entity (when the user opens the dialog) that receives three parameters for *entity* (the record that was selected), *data* (the current data bound to the Activity or History dialog), and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic, modify the data, etc in this callback function.  
-**Sample:** `function(entity, data, config) {}`  
+**Sample:** `function(entity, data, config) {}`   
+
+### Picklist Type Configuration Options
+
+**`bind`** *(required)*    
+**Value:** Property to bind the control to. This property must exist on the Activity and History entities    
+**Sample:** `'SomeProperty`  
+**Default:** None  
+
+**`picklist`**   
+**Value:** The name of the picklist to display   
+**Sample:** `'Account Type`  
+**Default:** None  
+
+**`multiSelect`**   
+**Value:** true|false, indicating whether the user can select a single item or multiple     
+**Sample:** `'true`  
+**Default:** false    
+
+### Textbox Type Configuration Options
+
+**`bind`** *(required)*    
+**Value:** Property to bind the control to. This property must exist on the Activity and History entities    
+**Sample:** `'SomeProperty`  
+**Default:** None  
+
+### Datepicker Type Configuration Options
+
+**`bind`** *(required)*    
+**Value:** Property to bind the control to. This property must exist on the Activity and History entities    
+**Sample:** `'SomeProperty`  
+**Default:** None  
+
+### Checkbox Type Configuration Options
+
+**`bind`** *(required)*    
+**Value:** Property to bind the control to. This property must exist on the Activity and History entities    
+**Sample:** `'SomeProperty`  
+**Default:** None  
 
 ### Sample Configuration Object - Minimal  
 
@@ -128,6 +170,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
     id: 'widgetLookup', /* optional - derive from entity */
     label: 'Widget', /* optional - derive from entity */
     active: true, /* optional - default true */ 
+    container: 'contactContainer', /* optional */
     includeTabColumn: false, /* optional - default false */
     entityPath: 'widgets', /* optional - derive from entity */
     select: ['WidgetName', 'Account/AccountName'], /* optional - derive from fields*/
@@ -145,9 +188,10 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
     parentContext: [ /* optional */
         {entity: 'Account', id: 'AccountId', text: 'AccountName'}
     ],
-    onLookupSelect: function(entity, data, config) {}, /* optional - "this" is dialog */
     onSetContext: function(entity, data, config) {} /* optional - "this" is dialog */
-    onBeforeSave: function(data, config) {} /* optional - "this" is dialog /* 
+    onBeforeSave: function(data, config) {}, /* optional - "this" is dialog /* 
+    onAfterDialogCreate: function(config) {}, /* optional - "this" is dialog, callback after dialog postCreate 
+    onChange: function(control, value, data, config) {} /* "this" is dialog  */
 } 
 ```  
 
@@ -238,7 +282,7 @@ function(activityModule) {
             {field: 'Account.AccountName', label: 'Account'}
         ]
     };
-	
+    
     // register it 
     activityModule.registerCustomization(config);
 
