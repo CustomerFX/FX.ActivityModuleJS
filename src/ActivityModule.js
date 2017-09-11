@@ -12,6 +12,7 @@ define([
     'dojo/_base/connect',
     'dojo/aspect',
     'dojo/dom-construct',
+    'Sage/Utility',
     'Sage/MainView/ActivityMgr/ActivityEditor',
     'Sage/MainView/ActivityMgr/HistoryEditor',
     'Sage/Services/ActivityService',
@@ -26,6 +27,8 @@ define([
     'Sage/UI/Controls/DateTimePicker',
     'Sage/UI/Controls/CheckBox',
     'Sage/UI/Controls/GridParts/Columns/SlxLink',
+    'Sage/UI/Controls/GridParts/Columns/DateTime',
+    'Sage/UI/Controls/GridParts/Columns/CheckBox',
     'FXActivity/CustomConfigurations'
 ],
 function (
@@ -34,6 +37,7 @@ function (
     connector,
     aspect,
     domConstruct,
+    utility,
     ActivityEditor,
     HistoryEditor,
     ActivityService,
@@ -48,6 +52,8 @@ function (
     DateTimePicker,
     CheckBox,
     ColumnLink,
+    ColumnDate,
+    ColumnCheck,
     CustomConfigurations
 ) {
     var __activityModule = declare('FXActiviy.ActivityModule', null, {
@@ -225,7 +231,7 @@ function (
 
                     this._setConfigValue(config, 'id', config.bind + '_checkbox');
                     this._setConfigValue(config, 'label', config.bind);
-                    this._setConfigValue(config, 'container', 'datesContainer');
+                    this._setConfigValue(config, 'container', 'regardingContainer');
                     break;
                 case 'config':
                     config.includeTabColumn = false;
@@ -244,7 +250,7 @@ function (
         },
 
         _manualBind: function() {
-            // if no lookups created
+            // if no controls created
             if ((this._editor_acitivityModuleControls || []).length === 0)
                 return;
 
@@ -252,9 +258,8 @@ function (
             var data = this._activityData || this._historyData;
 
             this._editor_acitivityModuleControls.forEach(function(control) {
-
-                switch (control.declaredClass) {
-                    case 'Sage.UI.Controls.Lookup':
+                switch (control._activityModuleConfig.type) {
+                    case 'lookup':
                         var name = data[control._activityModuleConfig.bind.text];
                         if (!name && data.Details && data.Details[control._activityModuleConfig.bind.text])
                             name = data.Details[control._activityModuleConfig.bind.text];
@@ -264,6 +269,18 @@ function (
                             $descriptor: name
                         } : null);
                         break;
+                    default:
+                        var value = data[control._activityModuleConfig.bind];
+                        if (!value && data.Details && data.Details[control._activityModuleConfig.bind])
+                            value = data.Details[control._activityModuleConfig.bind];
+
+                        if (value && control._activityModuleConfig.type == 'datepicker')
+                            value = utility.Convert.toDateFromString(value);
+
+                        control.set('value', value || null);
+                        if (!value) {
+                            control.reset && control.reset();
+                        }
                 }
             }, this);
 
@@ -293,7 +310,7 @@ function (
 
             // create controls
             this._activityModule.configurations.forEach(function(config) {
-                if (config.type != 'config') 
+                if (config.type != 'config')
                     this._editor_acitivityModuleControls.push(this._editor_createControl.call(this, config));
             }, this);
 
@@ -311,9 +328,9 @@ function (
 
         _activitySave: function() {
             this._activityModule.configurations.forEach(function(config) {
-                if (config.type == 'lookup') {
-                    if (this._activityData && this._activityData.Details)
-                        this._activityData.Details[config.bind.text] = this._activityData[config.bind.text];
+                if (this._activityData && this._activityData.Details) {
+                    var bindField = config.type == 'lookup' ? config.bind.text : config.bind;
+                    this._activityData.Details[bindField] = this._activityData[bindField];
                 }
 
                 if (config.hasOwnProperty('onBeforeSave') && typeof config.onBeforeSave === 'function') {
@@ -343,7 +360,7 @@ function (
 
             // create control
             var control = new controlType({
-                id: config.id,
+                id: this.id + '-' + config.id,
                 label: config.label
             });
 
@@ -423,7 +440,7 @@ function (
                     break;
                 case 'checkbox':
                     var checked = control.get('value');
-                    data[config.bind] = (checked || checked === 'on');
+                    data[config.bind] = (checked === 'on');
                     break;
                 default:
                     data[config.bind] = control.get('value');
@@ -508,21 +525,56 @@ function (
 
         _list_onBeforeCreateGrid: function(options) {
             this._activityModule.configurations.forEach(function(config) {
-                if (config.type == 'lookup' && config.includeTabColumn) {
+                if (!config.includeTabColumn) return;
+
+                // set up store fields
+                var bindField = config.bind;
+                if (config.type == 'lookup') {
                     options.storeOptions.select.push(config.bind.id);
-    				options.storeOptions.select.push(config.bind.text);
+                    bindField = config.bind.text;
+                }
+                options.storeOptions.select.push(bindField);
+                if (this.tabId == 'ActivityList')
+                    options.storeOptions.select.push('Details/' + bindField);
 
-                    if (this.tabId == 'ActivityList')
-                        options.storeOptions.select.push('Details/' + config.bind.text);
-
-                    options.columns.push({
-                        field: (this.tabId == 'ActivityList' ? 'Details.' : '') + config.bind.text,
-                        label: config.label,
-                        width: '100px',
-                        type: ColumnLink,
-                        idField: config.bind.id,
-                        pageName: config.entity
-                    });
+                switch (config.type) {
+                    case 'lookup':
+                        // only show for lookup types if not viewing the entity
+                        var entityType = Sage.Services.getService('ClientEntityContext').getContext().EntityType;
+                        if (entityType != 'Sage.Entity.Interfaces.I' + config.entity) {
+                            options.columns.push({
+                                field: (this.tabId == 'ActivityList' ? 'Details.' : '') + config.bind.text,
+                                label: config.label,
+                                width: '100px',
+                                type: ColumnLink,
+                                idField: config.bind.id,
+                                pageName: config.entity
+                            });
+                        }
+                        break;
+                    case 'datepicker':
+                        options.columns.push({
+                            field: (this.tabId == 'ActivityList' ? 'Details.' : '') + config.bind,
+                            label: config.label,
+                            type: ColumnDate,
+                            dateOnly: false
+                        });
+                        break;
+                    case 'checkbox':
+                        options.columns.push({
+                            field: (this.tabId == 'ActivityList' ? 'Details.' : '') + config.bind,
+                            label: config.label,
+                            editor: ColumnCheck,
+                            editorArgs: {
+                                disabled: true
+                            }
+                        });
+                        break;
+                    default:
+                        options.columns.push({
+                            field: (this.tabId == 'ActivityList' ? 'Details.' : '') + config.bind,
+                            label: config.label
+                        });
                 }
             }, this);
         }

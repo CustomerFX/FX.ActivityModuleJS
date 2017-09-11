@@ -16,7 +16,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **Value:** "lookup", "picklist", "textbox", "datepicker", "checkbox", "config". This required value indicates the type of customization you are adding. The "config" type allows you to create a configuration that only uses the General options (mainly for using the `onAfterDialogCreate` and `onBeforeSave` callback functions).  
 
  **`id`**  
-**Value:** The ID to use for the control. The ID will be automatically given a name if none included.   
+**Value:** The ID to use for the control. The ID will be automatically given a name if none included. Note: the ID will be prefixed with "activityEditor-" for the activity dialog or "historyEditor=" for the history dialog.   
 **Default:** Based on configuration type, for example, for type "lookup", ID will be entity + "_lookup".   
 
 **`label`**  
