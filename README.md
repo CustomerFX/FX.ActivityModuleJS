@@ -3,8 +3,10 @@ A javascript library module that provides simple, configurable customization to 
 
 This works best using the [Customer FX Custom Loader Module](https://github.com/CustomerFX/FX.CustomLoader.Module). All you need to do is: 
 1. Install the [bundle from the Customer FX Custom Loader Module](https://github.com/CustomerFX/FX.CustomLoader.Module/raw/master/Deliverables/Custom%20Loader%20Module.zip) 
-2. Then, install the [FX.ActivityModule.JS Bundle](https://github.com/CustomerFX/FX.ActivityModule.JS/raw/master/Bundle%20for%20Custom%20Loader/FX.ActivityModule.JS.zip)
-3. Then, add your customization configuration (see options below) to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. 
+2. Install the [FX.ActivityModule.JS Bundle](https://github.com/CustomerFX/FX.ActivityModule.JS/raw/master/Bundle%20for%20Custom%20Loader/FX.ActivityModule.JS.zip)
+3. Add your custom field(s) to both the Activity and History entities (if you're adding a lookup, add both the ID and Name properties. See the `entity` property under Lookup Type for more info).
+4. Add your customization configuration (see options below) to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. 
+5. Enjoy the magic you've produced without any effort or code. :boom: 
 
 ## Registering Configured Customizations
 
@@ -189,8 +191,8 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
         {entity: 'Account', id: 'AccountId', text: 'AccountName'}
     ],
     onSetContext: function(entity, data, config) {} /* optional - "this" is dialog */
-    onBeforeSave: function(data, config) {}, /* optional - "this" is dialog /* 
-    onAfterDialogCreate: function(config) {}, /* optional - "this" is dialog, callback after dialog postCreate 
+    onBeforeSave: function(data, config) {}, /* optional - "this" is dialog */ 
+    onAfterDialogCreate: function(config) {}, /* optional - "this" is dialog, callback after dialog postCreate */ 
     onChange: function(control, value, data, config) {} /* "this" is dialog  */
 } 
 ```  
