@@ -295,5 +295,5 @@ While adding your customizations to the [CustomConfigurations.js](https://github
 
 **The following is a sample showing many different types of customizations that were added with this library** :thumbsup: :boom:   
 
-<img src="http://content.screencast.com/users/RyanFarley/folders/Default/media/1ab69451-35d8-472e-bf24-3378517edff5/ActivityModule_SampleWithMany.png">
+<img src="http://content.screencast.com/users/RyanFarley/folders/Default/media/f1b9417b-0800-4bdc-83ed-20d0d8bfb573/ActivityModule_SampleWithMany.png">
 
