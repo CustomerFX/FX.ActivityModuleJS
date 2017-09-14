@@ -84,10 +84,10 @@ function (
                 _editor_onControlChange: this._editor_onControlChange,
                 _editor_addContainerControls: this._editor_addContainerControls
             });
-            aspect.after(ActivityEditor.prototype, '_ensureLookupsCreated', this._createEditorControls);
-            aspect.after(ActivityEditor.prototype, '_manualBind', this._manualBind);
-            aspect.after(ActivityEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
-            aspect.before(ActivityEditor.prototype, '_saveAndClose', this._activitySave);
+            aspect.after(ActivityEditor.prototype, '_ensureLookupsCreated', this._editor_ensureControlsCreated);
+            aspect.after(ActivityEditor.prototype, '_manualBind', this._editor_manualBind);
+            aspect.after(ActivityEditor.prototype, '_updateLookupSeedValues', this._editor_updateLookupSeedValues);
+            aspect.before(ActivityEditor.prototype, '_saveAndClose', this._editor_activitySave);
             aspect.after(ActivityEditor.prototype, 'postCreate', function() {
                 this._activityModule.configurations.forEach(function(config) {
                     if (config.hasOwnProperty('onAfterDialogCreate') && typeof config.onAfterDialogCreate === 'function') {
@@ -105,10 +105,10 @@ function (
                 _editor_onControlChange: this._editor_onControlChange,
                 _editor_addContainerControls: this._editor_addContainerControls
             });
-            aspect.after(HistoryEditor.prototype, 'createAccountLookup', this._createEditorControls);
-            aspect.after(HistoryEditor.prototype, '_manualBind',this. _manualBind);
-            aspect.after(HistoryEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
-            aspect.before(HistoryEditor.prototype, '_okClick', this._historySave);
+            aspect.after(HistoryEditor.prototype, 'createAccountLookup', this._editor_ensureControlsCreated);
+            aspect.after(HistoryEditor.prototype, '_manualBind',this. _editor_manualBind);
+            aspect.after(HistoryEditor.prototype, '_updateLookupSeedValues', this._editor_updateLookupSeedValues);
+            aspect.before(HistoryEditor.prototype, '_okClick', this._editor_historySave);
             aspect.after(HistoryEditor.prototype, 'postCreate', function() {
                 this._activityModule.configurations.forEach(function(config) {
                     if (config.hasOwnProperty('onAfterDialogCreate') && typeof config.onAfterDialogCreate === 'function') {
@@ -140,8 +140,9 @@ function (
                         }
                         originalMethod.call(activityService, type, args);
                     }
-                    if (!this._service_getLookupDefaultContext(activityService, showEditor))
+                    if (!this._service_getLookupDefaultContext(activityService, showEditor)) {
                         showEditor();
+                    }
                 }
             });
         },
@@ -260,58 +261,7 @@ function (
             }
         },
 
-        _manualBind: function() {
-            // if no controls created
-            if ((this._editor_acitivityModuleControls || []).length === 0)
-                return;
-
-            this._isBinding = true;
-            var data = this._activityData || this._historyData;
-
-            this._editor_acitivityModuleControls.forEach(function(control) {
-                switch (control._activityModuleConfig.type) {
-                    case 'lookup':
-                        var name = data[control._activityModuleConfig.bind.text];
-                        if (!name && data.Details && data.Details[control._activityModuleConfig.bind.text])
-                            name = data.Details[control._activityModuleConfig.bind.text];
-
-                        control.set('selectedObject', data[control._activityModuleConfig.bind.id] ? {
-                            $key: data[control._activityModuleConfig.bind.id],
-                            $descriptor: name
-                        } : null);
-                        break;
-                    default:
-                        var value = data[control._activityModuleConfig.bind];
-                        if (!value && data.Details && data.Details[control._activityModuleConfig.bind])
-                            value = data.Details[control._activityModuleConfig.bind];
-
-                        if (value && control._activityModuleConfig.type == 'datepicker')
-                            value = utility.Convert.toDateFromString(value);
-
-                        control.set('value', value || null);
-                        if (!value) {
-                            control.reset && control.reset();
-                        }
-                }
-            }, this);
-
-            this._isBinding = false;
-        },
-
-        _updateLookupSeedValues: function(newSeed) {
-            if ((this._editor_acitivityModuleControls || []).length === 0)
-                return;
-
-            var accId = newSeed || (this._activityData || this._historyData).AccountId;
-            this._editor_acitivityModuleControls.forEach(function(control) {
-                if (control.declaredClass == 'Sage.UI.Controls.Lookup') {
-                    if (control.config.seedProperty)
-                        control.config.seedValue = accId;
-                }
-            }, this);
-        },
-
-        _createEditorControls: function() {
+        _editor_ensureControlsCreated: function() {
             // if already created controls
             if ((this._editor_acitivityModuleControls || []).length > 0)
                 return;
@@ -336,27 +286,6 @@ function (
                     }
                 }, this);
             }
-        },
-
-        _activitySave: function() {
-            this._activityModule.configurations.forEach(function(config) {
-                if (this._activityData && this._activityData.Details) {
-                    var bindField = config.type == 'lookup' ? config.bind.text : config.bind;
-                    this._activityData.Details[bindField] = this._activityData[bindField];
-                }
-
-                if (config.hasOwnProperty('onBeforeSave') && typeof config.onBeforeSave === 'function') {
-                    config.onBeforeSave.call(this, this._activityData, config);
-                }
-            }, this);
-        },
-
-        _historySave: function() {
-            this._activityModule.configurations.forEach(function(config) {
-                if (config.hasOwnProperty('onBeforeSave') && typeof config.onBeforeSave === 'function') {
-                    config.onBeforeSave.call(this, this._historyData, config);
-                }
-            }, this);
         },
 
         _editor_createControl: function(config) {
@@ -464,6 +393,57 @@ function (
             }
         },
 
+        _editor_manualBind: function() {
+            // if no controls created
+            if ((this._editor_acitivityModuleControls || []).length === 0)
+                return;
+
+            this._isBinding = true;
+            var data = this._activityData || this._historyData;
+
+            this._editor_acitivityModuleControls.forEach(function(control) {
+                switch (control._activityModuleConfig.type) {
+                    case 'lookup':
+                        var name = data[control._activityModuleConfig.bind.text];
+                        if (!name && data.Details && data.Details[control._activityModuleConfig.bind.text])
+                            name = data.Details[control._activityModuleConfig.bind.text];
+
+                        control.set('selectedObject', data[control._activityModuleConfig.bind.id] ? {
+                            $key: data[control._activityModuleConfig.bind.id],
+                            $descriptor: name
+                        } : null);
+                        break;
+                    default:
+                        var value = data[control._activityModuleConfig.bind];
+                        if (!value && data.Details && data.Details[control._activityModuleConfig.bind])
+                            value = data.Details[control._activityModuleConfig.bind];
+
+                        if (value && control._activityModuleConfig.type == 'datepicker')
+                            value = utility.Convert.toDateFromString(value);
+
+                        control.set('value', value || null);
+                        if (!value) {
+                            control.reset && control.reset();
+                        }
+                }
+            }, this);
+
+            this._isBinding = false;
+        },
+
+        _editor_updateLookupSeedValues: function(newSeed) {
+            if ((this._editor_acitivityModuleControls || []).length === 0)
+                return;
+
+            var accId = newSeed || (this._activityData || this._historyData).AccountId;
+            this._editor_acitivityModuleControls.forEach(function(control) {
+                if (control.declaredClass == 'Sage.UI.Controls.Lookup') {
+                    if (control.config.seedProperty)
+                        control.config.seedValue = accId;
+                }
+            }, this);
+        },
+
         _service_getLookupDefaultContext: function(scope, callback) {
             // if no registered configurations
             if (scope._activityModule.configurations.length === 0)
@@ -484,6 +464,27 @@ function (
             }, this);
 
             return hasContext;
+        },
+
+        _editor_activitySave: function() {
+            this._activityModule.configurations.forEach(function(config) {
+                if (this._activityData && this._activityData.Details) {
+                    var bindField = config.type == 'lookup' ? config.bind.text : config.bind;
+                    this._activityData.Details[bindField] = this._activityData[bindField];
+                }
+
+                if (config.hasOwnProperty('onBeforeSave') && typeof config.onBeforeSave === 'function') {
+                    config.onBeforeSave.call(this, this._activityData, config);
+                }
+            }, this);
+        },
+
+        _editor_historySave: function() {
+            this._activityModule.configurations.forEach(function(config) {
+                if (config.hasOwnProperty('onBeforeSave') && typeof config.onBeforeSave === 'function') {
+                    config.onBeforeSave.call(this, this._historyData, config);
+                }
+            }, this);
         },
 
         _service_getEntityContext: function(config, entityContext, scope, callback) {
