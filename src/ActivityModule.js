@@ -169,6 +169,16 @@ function (
             if (!config.active)
                 return;
 
+            // register type:config callbacks
+            if (config.type == 'config' && config.callbacks.length) {
+                config.callbacks.forEach(function(callback) {
+                    if (ActivityEditor.prototype[callback.function])
+                        aspect[callback.when].apply(this, [ActivityEditor.prototype, callback.function, callback.execute, true]);
+                    if (HistoryEditor.prototype[callback.function])
+                        aspect[callback.when].apply(this, [HistoryEditor.prototype, callback.function, callback.execute, true]);
+                }, this);
+            }
+
             console.log('[FX] Activity/history ' + config.type + ' customization registered. (c) 2017 customerfx.com');
             this.configurations.push(config);
         },
@@ -234,6 +244,7 @@ function (
                     this._setConfigValue(config, 'container', 'regardingContainer');
                     break;
                 case 'config':
+                    this._setConfigValue(config, 'callbacks', []);
                     config.includeTabColumn = false;
                     break;
             }
@@ -310,8 +321,9 @@ function (
 
             // create controls
             this._activityModule.configurations.forEach(function(config) {
-                if (config.type != 'config')
+                if (config.type != 'config') {
                     this._editor_acitivityModuleControls.push(this._editor_createControl.call(this, config));
+                }
             }, this);
 
             // add to containers
