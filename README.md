@@ -15,7 +15,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 ### General Configuration Options
 
 **`type`** *(required)*  
-**Value:** "lookup", "picklist", "textbox", "datepicker", "checkbox", "config". This required value indicates the type of customization you are adding. The "config" type allows you to create a configuration that only uses the General options (mainly for using the `onAfterDialogCreate` and `onBeforeSave` callback functions).  
+**Value:** "lookup", "picklist", "textbox", "datepicker", "checkbox", "config". This required value indicates the type of customization you are adding. The "config" type allows you to create a configuration that only uses the General options (mainly for using the `onAfterDialogCreate` and `onBeforeSave` callback functions) and also register any callback (see Config Type section below).  
 
  **`id`**  
 **Value:** The ID to use for the control. The ID will be automatically given a name if none included. Note: the ID will be prefixed with "activityEditor-" for the activity dialog or "historyEditor-" for the history dialog.   
@@ -148,6 +148,13 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **`bind`** *(required)*    
 **Value:** Property to bind the control to. This property must exist on the Activity and History entities    
 **Sample:** `'SomeProperty`  
+**Default:** None  
+
+### Config Type Configuration Options
+
+**`callbacks`**    
+**Value:** An array of objects with three properties for `function` (the name of the function on the activity or history dialog that you want to get a callback for), `when` (before|after, indicating whether you want the callback before or after the original function), and `execute` (the function to execute for the callback). The "this" context for the function will be the dialog itself and any arguments for the original function can be obtained using `arguments`.    
+**Sample:** `'[ { function: 'postCreate', when: 'after', execute: function() { console.log('after postCreate'); } } ]`  
 **Default:** None  
 
 ### Sample Configuration Object - Minimal  
