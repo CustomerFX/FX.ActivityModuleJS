@@ -84,10 +84,10 @@ function (
                 _editor_onControlChange: this._editor_onControlChange,
                 _editor_addContainerControls: this._editor_addContainerControls
             });
-            aspect.after(ActivityEditor.prototype, '_ensureLookupsCreated', this._createEditorControls);
-            aspect.after(ActivityEditor.prototype, '_manualBind', this._manualBind);
-            aspect.after(ActivityEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
-            aspect.before(ActivityEditor.prototype, '_saveAndClose', this._activitySave);
+            aspect.after(ActivityEditor.prototype, '_ensureLookupsCreated', this._editor_ensureControlsCreated);
+            aspect.after(ActivityEditor.prototype, '_manualBind', this._editor_manualBind);
+            aspect.after(ActivityEditor.prototype, '_updateLookupSeedValues', this._editor_updateLookupSeedValues);
+            aspect.before(ActivityEditor.prototype, '_saveAndClose', this._editor_editor_activitySave);
             aspect.after(ActivityEditor.prototype, 'postCreate', function() {
                 this._activityModule.configurations.forEach(function(config) {
                     if (config.hasOwnProperty('onAfterDialogCreate') && typeof config.onAfterDialogCreate === 'function') {
@@ -105,10 +105,10 @@ function (
                 _editor_onControlChange: this._editor_onControlChange,
                 _editor_addContainerControls: this._editor_addContainerControls
             });
-            aspect.after(HistoryEditor.prototype, 'createAccountLookup', this._createEditorControls);
-            aspect.after(HistoryEditor.prototype, '_manualBind',this. _manualBind);
-            aspect.after(HistoryEditor.prototype, '_updateLookupSeedValues', this._updateLookupSeedValues);
-            aspect.before(HistoryEditor.prototype, '_okClick', this._historySave);
+            aspect.after(HistoryEditor.prototype, 'createAccountLookup', this._editor_ensureControlsCreated);
+            aspect.after(HistoryEditor.prototype, '_manualBind',this. _editor_manualBind);
+            aspect.after(HistoryEditor.prototype, '_updateLookupSeedValues', this._editor_updateLookupSeedValues);
+            aspect.before(HistoryEditor.prototype, '_okClick', this._editor_historySave);
             aspect.after(HistoryEditor.prototype, 'postCreate', function() {
                 this._activityModule.configurations.forEach(function(config) {
                     if (config.hasOwnProperty('onAfterDialogCreate') && typeof config.onAfterDialogCreate === 'function') {
@@ -140,8 +140,9 @@ function (
                         }
                         originalMethod.call(activityService, type, args);
                     }
-                    if (!this._service_getLookupDefaultContext(activityService, showEditor))
+                    if (!this._service_getLookupDefaultContext(activityService, showEditor)) {
                         showEditor();
+                    }
                 }
             });
         },
@@ -260,7 +261,7 @@ function (
             }
         },
 
-        _manualBind: function() {
+        _editor_manualBind: function() {
             // if no controls created
             if ((this._editor_acitivityModuleControls || []).length === 0)
                 return;
@@ -298,7 +299,7 @@ function (
             this._isBinding = false;
         },
 
-        _updateLookupSeedValues: function(newSeed) {
+        _editor_updateLookupSeedValues: function(newSeed) {
             if ((this._editor_acitivityModuleControls || []).length === 0)
                 return;
 
@@ -311,7 +312,7 @@ function (
             }, this);
         },
 
-        _createEditorControls: function() {
+        _editor_ensureControlsCreated: function() {
             // if already created controls
             if ((this._editor_acitivityModuleControls || []).length > 0)
                 return;
@@ -338,7 +339,7 @@ function (
             }
         },
 
-        _activitySave: function() {
+        _editor_activitySave: function() {
             this._activityModule.configurations.forEach(function(config) {
                 if (this._activityData && this._activityData.Details) {
                     var bindField = config.type == 'lookup' ? config.bind.text : config.bind;
@@ -351,7 +352,7 @@ function (
             }, this);
         },
 
-        _historySave: function() {
+        _editor_historySave: function() {
             this._activityModule.configurations.forEach(function(config) {
                 if (config.hasOwnProperty('onBeforeSave') && typeof config.onBeforeSave === 'function') {
                     config.onBeforeSave.call(this, this._historyData, config);
