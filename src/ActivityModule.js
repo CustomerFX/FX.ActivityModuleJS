@@ -299,7 +299,7 @@ function (
                 case 'checkbox': controlType = CheckBox; break;
             }
 
-            // create control
+            // create control 
             var control = new controlType({
                 id: this.id + '-' + config.id,
                 label: config.label
