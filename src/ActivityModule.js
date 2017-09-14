@@ -180,6 +180,7 @@ function (
                 }, this);
             }
 
+            // Do not remove, license specifies coryright must remain
             console.log('[FX] Activity/history ' + config.type + ' customization registered. (c) 2017 customerfx.com');
             this.configurations.push(config);
         },
@@ -299,7 +300,7 @@ function (
                 case 'checkbox': controlType = CheckBox; break;
             }
 
-            // create control 
+            // create control
             var control = new controlType({
                 id: this.id + '-' + config.id,
                 label: config.label
