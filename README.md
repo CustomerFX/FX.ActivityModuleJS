@@ -49,6 +49,14 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 **Value:** A callback function that fires when the changes the value of the control that receives four parameters for *control* (the control that was changed), *value* (the value of the control), *data* (the current data bound to the Activity or History dialog), and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic, modify the data, etc in this callback function.  
 **Sample:** `function(control, value, data, config) {}`  
 
+**`onBeforeControlCreate`**  
+**Value:** A callback function that fires before the control is created and receives one parameter of *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself.   
+**Sample:** `function(config) {}`  
+
+**`onAfterControlCreate`**  
+**Value:** A callback function that fires after the control is created and receives two parameters of *control* (the control that was created) and *config* (a reference to this configuration). The `this` context of the function will be the activity or history dialog itself. You can perform other optional logic to further customize the activity dialog in this function in this callback function.  
+**Sample:** `function(control, config) {}`  
+
 ### Lookup Type Configuration Options   
 
 **`entity`** *(required)*  

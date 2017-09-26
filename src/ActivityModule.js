@@ -290,6 +290,10 @@ function (
         },
 
         _editor_createControl: function(config) {
+            if (config.hasOwnProperty('onBeforeControlCreate') && typeof config.onBeforeControlCreate === 'function') {
+                config.onBeforeControlCreate.call(this, config);
+            }
+
             // get control type
             var controlType = null;
             switch (config.type) {
@@ -339,10 +343,13 @@ function (
                 });
             }
 
-            // wire up change event
             this.eventConnections.push(connector.connect(control, 'onChange', lang.hitch(this, this._editor_onControlChange, control, config)));
-
             control._activityModuleConfig = config;
+
+            if (config.hasOwnProperty('onAfterControlCreate') && typeof config.onAfterControlCreate === 'function') {
+                config.onAfterControlCreate.call(this, control, config);
+            }
+
             return control;
         },
 
