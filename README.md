@@ -1,16 +1,16 @@
-# FX.ActivityModule.JS
-A javascript library module that provides simple, configurable customization to the activity and history dialogs & tabs in Infor CRM Web. The library allows for customizations to be easily configured (in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file) or via declarative use by registering customizations at runtime.  
+# FX.ActivityModuleJS
+A javascript library module that provides simple, configurable customization to the activity and history dialogs & tabs in Infor CRM Web. The library allows for customizations to be easily configured (in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModuleJS/blob/master/src/CustomConfigurations.js) file) or via declarative use by registering customizations at runtime.  
 
 This works best using the [Customer FX Custom Loader Module](https://github.com/CustomerFX/FX.CustomLoader.Module). All you need to do is: 
 1. Install the [bundle from the Customer FX Custom Loader Module](https://github.com/CustomerFX/FX.CustomLoader.Module/raw/master/Deliverables/Custom%20Loader%20Module.zip) 
-2. Install the [FX.ActivityModule.JS Bundle](https://github.com/CustomerFX/FX.ActivityModule.JS/raw/master/Bundle%20for%20Custom%20Loader/FX.ActivityModule.JS.zip)
+2. Install the [FX.ActivityModuleJS Bundle](https://github.com/CustomerFX/FX.ActivityModuleJS/raw/master/Bundle%20for%20Custom%20Loader/FX.ActivityModuleJS.zip)
 3. Add your custom field(s) to both the Activity and History entities (if you're adding a lookup, add both the ID and Name properties. See the `entity` property under Lookup Type for more info).
-4. Add your customization configuration (see options below) to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. 
+4. Add your customization configuration (see options below) to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModuleJS/blob/master/src/CustomConfigurations.js) file. 
 5. Enjoy the magic you've produced without any effort or code. :boom: 
 
 ## Registering Configured Customizations
 
-Customizations can be configured in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. This file simply returns an array of configuration objects that contain the options listed below. You can add configuration objects to this array and they will be automatically loaded at runtime. The configuration options available depend on the type of customization you are configuring. The General configuration options apply to all customization types. Refer to the list of options available for the specific type of customization, for example the Lookup type.   
+Customizations can be configured in the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModuleJS/blob/master/src/CustomConfigurations.js) file. This file simply returns an array of configuration objects that contain the options listed below. You can add configuration objects to this array and they will be automatically loaded at runtime. The configuration options available depend on the type of customization you are configuring. The General configuration options apply to all customization types. Refer to the list of options available for the specific type of customization, for example the Lookup type.   
 
 ### General Configuration Options
 
@@ -214,7 +214,7 @@ Customizations can be configured in the [CustomConfigurations.js](https://github
 
 **Simply add the objects, like the ones above, to the CustomConfigurations.configurations array and the magic will happen, automatically, at runtime.**    
 
-Once you have the configuration object constructed, you'll add it to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. The with with some sample configurations would look like this:  
+Once you have the configuration object constructed, you'll add it to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModuleJS/blob/master/src/CustomConfigurations.js) file. The with with some sample configurations would look like this:  
 
 ```javascript   
 // This is a sample CustomConigurations file with two registered lookups to add to the activity & history dialogs
@@ -264,7 +264,7 @@ function(
 
 ## Registering Declarative Customizations  
 
-You can also register customizations as runtime as well, instead of adding them to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file. To do this, simply create a configuration object as shown above, and pass it to the `registerCustomization` function of the ActivityModule. See sample below:  
+You can also register customizations as runtime as well, instead of adding them to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModuleJS/blob/master/src/CustomConfigurations.js) file. To do this, simply create a configuration object as shown above, and pass it to the `registerCustomization` function of the ActivityModule. See sample below:  
 
 ```javascript 
 require([
@@ -306,7 +306,7 @@ function(activityModule) {
 });
 ```   
 
-While adding your customizations to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModule.JS/blob/master/src/CustomConfigurations.js) file is the recommended approach, declaratively registering customizations will allow you to conditionally add customizations if needed.  
+While adding your customizations to the [CustomConfigurations.js](https://github.com/CustomerFX/FX.ActivityModuleJS/blob/master/src/CustomConfigurations.js) file is the recommended approach, declaratively registering customizations will allow you to conditionally add customizations if needed.  
 
 **The following is a sample showing many different types of customizations that were added with this library** :thumbsup: :boom:   
 
