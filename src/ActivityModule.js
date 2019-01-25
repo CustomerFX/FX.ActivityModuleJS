@@ -256,7 +256,7 @@ function (
             }
         },
 
-        _setConfigValue(config, key, defaultValue) {
+        _setConfigValue: function(config, key, defaultValue) {
             if (!config.hasOwnProperty(key)) {
                 config[key] = defaultValue;
             }
