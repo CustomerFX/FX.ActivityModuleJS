@@ -2,7 +2,7 @@
 	Customer FX Activity Module
 	See license and usage information at https://github.com/CustomerFX/FX.ActivityModule.JS
 
-	Copyright (c) 2017 Customer FX Corporation
+	Copyright (c) 2017-2020 Customer FX Corporation
 	http://customerfx.com
 */
 
@@ -12,6 +12,9 @@ define([
     'dojo/_base/connect',
     'dojo/aspect',
     'dojo/dom-construct',
+    'dijit/form/SimpleTextarea',
+    'dijit/layout/ContentPane',
+    'dojox/layout/TableContainer',
     'Sage/Utility',
     'Sage/MainView/ActivityMgr/ActivityEditor',
     'Sage/MainView/ActivityMgr/HistoryEditor',
@@ -26,6 +29,7 @@ define([
     'Sage/UI/Controls/MultiSelectPickList',
     'Sage/UI/Controls/DateTimePicker',
     'Sage/UI/Controls/CheckBox',
+    'Sage/UI/Controls/CurrencyTextBox',
     'Sage/UI/Controls/GridParts/Columns/SlxLink',
     'Sage/UI/Controls/GridParts/Columns/DateTime',
     'Sage/UI/Controls/GridParts/Columns/CheckBox',
@@ -37,6 +41,9 @@ function (
     connector,
     aspect,
     domConstruct,
+    Textarea,
+    ContentPane,
+    TableContainer,
     utility,
     ActivityEditor,
     HistoryEditor,
@@ -51,6 +58,7 @@ function (
     MultiSelectPickList,
     DateTimePicker,
     CheckBox,
+    CurrencyTextBox,
     ColumnLink,
     ColumnDate,
     ColumnCheck,
@@ -58,7 +66,7 @@ function (
 ) {
     var __activityModule = declare('FXActiviy.ActivityModule', null, {
 
-        _validConfigTypes: ['lookup', 'picklist', 'textbox', 'datepicker', 'checkbox', 'config'],
+        _validConfigTypes: ['lookup', 'picklist', 'textbox', 'datepicker', 'checkbox', 'currency', 'memo', 'container', 'spacer', 'config'],
         _validContainers: ['contactContainer', 'regardingContainer', 'leadContainer', 'categoryContainer', 'notesContainer', 'resultContainer', 'datesContainer'],
 
         configurations: [],
@@ -81,6 +89,7 @@ function (
             lang.extend(ActivityEditor, {
                 _editor_acitivityModuleControls: [],
                 _editor_createControl: this._editor_createControl,
+                _editor_createContainer: this._editor_createContainer,
                 _editor_onControlChange: this._editor_onControlChange,
                 _editor_addContainerControls: this._editor_addContainerControls
             });
@@ -88,6 +97,7 @@ function (
             aspect.after(ActivityEditor.prototype, '_manualBind', this._editor_manualBind);
             aspect.after(ActivityEditor.prototype, '_updateLookupSeedValues', this._editor_updateLookupSeedValues);
             aspect.before(ActivityEditor.prototype, '_saveAndClose', this._editor_activitySave);
+            aspect.before(ActivityEditor.prototype, '_updateAttendeesAndComplete', this._editor_activitySave);
             aspect.after(ActivityEditor.prototype, 'postCreate', function() {
                 this._activityModule.configurations.forEach(function(config) {
                     if (config.hasOwnProperty('onAfterDialogCreate') && typeof config.onAfterDialogCreate === 'function') {
@@ -102,6 +112,7 @@ function (
             lang.extend(HistoryEditor, {
                 _editor_acitivityModuleControls: [],
                 _editor_createControl: this._editor_createControl,
+                _editor_createContainer: this._editor_createContainer,
                 _editor_onControlChange: this._editor_onControlChange,
                 _editor_addContainerControls: this._editor_addContainerControls
             });
@@ -179,9 +190,8 @@ function (
                         aspect[callback.when].apply(this, [HistoryEditor.prototype, callback.function, callback.execute, true]);
                 }, this);
             }
-
-            // Do not remove, license specifies coryright must remain
-            console.log('[FX] Activity/history ' + config.type + ' customization registered. (c) 2017 customerfx.com');
+            
+            console.log('[FX] Activity/history ' + config.type + ' customization registered. (c) 2017-2020 customerfx.com');
             this.configurations.push(config);
         },
 
@@ -245,6 +255,39 @@ function (
                     this._setConfigValue(config, 'label', config.bind);
                     this._setConfigValue(config, 'container', 'regardingContainer');
                     break;
+                case 'currency':
+                    if (!config.hasOwnProperty('bind'))
+                        throw new Error('Configuration is not valid for currency. Missing bind property');
+
+                    this._setConfigValue(config, 'id', config.bind + '_currency');
+                    this._setConfigValue(config, 'label', config.bind);
+                    this._setConfigValue(config, 'container', 'regardingContainer');
+                    break;
+                case 'memo':
+                    if (!config.hasOwnProperty('bind'))
+                        throw new Error('Configuration is not valid for memo. Missing bind property');
+
+                    this._setConfigValue(config, 'id', config.bind + '_memo');
+                    this._setConfigValue(config, 'label', config.bind);
+                    this._setConfigValue(config, 'container', 'notesContainer');
+                    this._setConfigValue(config, 'rows', 4);
+                    break;
+                case 'container':
+                    if (!config.hasOwnProperty('id'))
+                        throw new Error('Configuration is not valid for container. Missing id property');
+
+                    this._setConfigValue(config, 'columns', 1);
+                    this._setConfigValue(config, 'customClass', '');
+                    this._setConfigValue(config, 'style', '');
+                    this._setConfigValue(config, 'labelWidth', 100);
+                    this._setConfigValue(config, 'afterContainer', 'cp_General');
+                    this._validContainers.push(config.id);
+                    break;
+                case 'spacer':
+                    this._setConfigValue(config, 'id', 'spacer-' + (new Date()).getTime());
+                    this._setConfigValue(config, 'label', '');
+                    this._setConfigValue(config, 'container', 'regardingContainer');
+                    break;
                 case 'config':
                     this._setConfigValue(config, 'callbacks', []);
                     config.includeTabColumn = false;
@@ -272,8 +315,18 @@ function (
 
             // create controls
             this._activityModule.configurations.forEach(function(config) {
-                if (config.type != 'config') {
-                    this._editor_acitivityModuleControls.push(this._editor_createControl.call(this, config));
+                if (config.type != 'config' && config.hasOwnProperty('dialog') && config.dialog != this.id) {
+                    return;
+                }
+
+                switch (config.type) {
+                    case 'config':
+                        break;
+                    case 'container':
+                        this._editor_createContainer(config);
+                        break;
+                    default:
+                        this._editor_acitivityModuleControls.push(this._editor_createControl.call(this, config));
                 }
             }, this);
 
@@ -302,6 +355,9 @@ function (
                 case 'textbox': controlType = TextBox; break;
                 case 'datepicker': controlType = DateTimePicker; break;
                 case 'checkbox': controlType = CheckBox; break;
+                case 'currency': controlType = CurrencyTextBox; break;
+                case 'memo': controlType = Textarea; break;
+                case 'spacer': controlType = ContentPane; break;
             }
 
             // create control
@@ -313,6 +369,12 @@ function (
             // set picklist specific properties
             if (config.type == 'picklist') {
                 control.set('pickListName', config.picklist);
+            }
+
+            // set memo specific properties
+            if (config.type == 'memo') {
+                control.set('rows', config.rows);
+                control.set('style', 'width:100%;');
             }
 
             // set lookup specific properties
@@ -343,6 +405,11 @@ function (
                 });
             }
 
+            // set spacer specific properties
+            if (config.type == 'spacer') {
+                control.set('style', 'max-width:0px;');
+            }
+
             this.eventConnections.push(connector.connect(control, 'onChange', lang.hitch(this, this._editor_onControlChange, control, config)));
             control._activityModuleConfig = config;
 
@@ -351,6 +418,19 @@ function (
             }
 
             return control;
+        },
+
+        _editor_createContainer: function(config) {
+            var container = new TableContainer ({
+                id: this.id + '-' + config.id,
+                cols: config.columns,
+                customClass: config.customClass,
+                style: config.style,
+                labelWidth: config.labelWidth
+            });
+
+            this[config.afterContainer].addChild(container);
+            this[config.id] = container;
         },
 
         _editor_addContainerControls: function(container, controls) {
@@ -375,24 +455,31 @@ function (
                 return;
 
             var data = this._activityData || this._historyData;
+            if (!data.hasOwnProperty('Details')) data.Details = {};
 
             switch (config.type) {
                 case 'lookup':
                     if (selection) {
                         data[config.bind.id] = selection.$key;
+                        data.Details[config.bind.id] = selection.$key;
                         data[config.bind.text] = selection.$descriptor;
+                        data.Details[config.bind.text] = selection.$descriptor;
                     }
                     else {
                         data[config.bind.id] = null;
+                        data.Details[config.bind.id] = null;
                         data[config.bind.text] = null;
+                        data.Details[config.bind.text] = null;
                     }
                     break;
                 case 'checkbox':
                     var checked = control.get('value');
                     data[config.bind] = (checked === 'on');
+                    data.Details[config.bind] = (checked === 'on');
                     break;
                 default:
                     data[config.bind] = control.get('value');
+                    data.Details[config.bind] = control.get('value');
             }
 
             if (config.hasOwnProperty('onChange') && typeof config.onChange === 'function') {
@@ -415,9 +502,12 @@ function (
                         var name = data[control._activityModuleConfig.bind.text];
                         if (!name && data.Details && data.Details[control._activityModuleConfig.bind.text])
                             name = data.Details[control._activityModuleConfig.bind.text];
+                        var id = data[control._activityModuleConfig.bind.id];
+                        if (!id && data.Details && data.Details[control._activityModuleConfig.bind.id])
+                            id = data.Details[control._activityModuleConfig.bind.id];
 
-                        control.set('selectedObject', data[control._activityModuleConfig.bind.id] ? {
-                            $key: data[control._activityModuleConfig.bind.id],
+                        control.set('selectedObject', id ? {
+                            $key: id,
                             $descriptor: name
                         } : null);
                         break;
