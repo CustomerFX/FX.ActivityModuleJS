@@ -78,6 +78,8 @@ function (
             this._setupActivityList();
             this._setupHistoryList();
 
+            if (CustomConfigurations.hasOwnProperty('disable') && CustomConfigurations.disable) return;
+
             // load CustomConfigurations
             CustomConfigurations.configurations.forEach(function(config) {
                 this.registerCustomization(config);
@@ -105,6 +107,11 @@ function (
                     }
                 }, this);
             });
+            aspect.after(ActivityEditor.prototype, 'show', function() {
+                setTimeout(lang.hitch(this, function() {
+                    this._dialog._position();
+                }), 1);
+            });
         },
 
         _setupHistoryEditor: function() {
@@ -126,6 +133,11 @@ function (
                         config.onAfterDialogCreate.call(this, config);
                     }
                 }, this);
+            });
+            aspect.after(HistoryEditor.prototype, 'show', function() {
+                setTimeout(lang.hitch(this, function() {
+                    this._dialog._position();
+                }), 1);
             });
         },
 
@@ -555,7 +567,7 @@ function (
 
             var hasContext = false;
             scope._activityModule.configurations.forEach(function(config) {
-                if (entityContext.EntityType == 'Sage.Entity.Interfaces.I' + config.entity) {
+                if (config.type == 'lookup' && config.parentContext.length > 0 && entityContext.EntityType == 'Sage.Entity.Interfaces.I' + config.entity) {
                     this._service_getEntityContext(config, entityContext, scope, callback);
                     hasContext = true;
                 }
