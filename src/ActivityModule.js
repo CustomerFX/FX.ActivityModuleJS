@@ -197,9 +197,9 @@ function (
             if (config.type == 'config' && config.callbacks.length) {
                 config.callbacks.forEach(function(callback) {
                     if (ActivityEditor.prototype[callback.function])
-                        aspect[callback.when].apply(this, [ActivityEditor.prototype, callback.function, callback.execute, true]);
+                        aspect[callback.when].apply(this, [ActivityEditor.prototype, callback.function, callback.execute, callback.receiveArguments]);
                     if (HistoryEditor.prototype[callback.function])
-                        aspect[callback.when].apply(this, [HistoryEditor.prototype, callback.function, callback.execute, true]);
+                        aspect[callback.when].apply(this, [HistoryEditor.prototype, callback.function, callback.execute, callback.receiveArguments]);
                 }, this);
             }
             
@@ -302,6 +302,7 @@ function (
                     break;
                 case 'config':
                     this._setConfigValue(config, 'callbacks', []);
+					this._setConfigValue(config, 'receiveArguments', true);
                     config.includeTabColumn = false;
                     break;
             }
